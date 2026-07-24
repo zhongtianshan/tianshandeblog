@@ -34,6 +34,7 @@ html {
 }
 
 body {
+  position: relative;
   background: #000000;
   color: var(--text);
   font-family: "Minecraft", "Consolas", "Courier New", monospace;
@@ -95,6 +96,128 @@ header {
   padding: 60px 20px 40px;
   text-align: center;
   border-bottom: 1px solid var(--border);
+}
+
+.logo-ring {
+  position: relative;
+  width: 86px;
+  height: 86px;
+  margin: 0 auto 15px;
+}
+
+.logo-ring::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 3px solid var(--cyan);
+  animation: breatheRing 6s ease-in-out infinite;
+  box-shadow: 0 0 8px var(--cyan), 0 0 25px var(--cyan), 0 0 50px var(--cyan);
+}
+
+@keyframes breatheRing {
+  0%   { border-color: #ff0040; box-shadow: 0 0 8px #ff0040, 0 0 25px #ff0040, 0 0 50px #ff0040; }
+  20%  { border-color: #ff6600; box-shadow: 0 0 8px #ff6600, 0 0 25px #ff6600, 0 0 50px #ff6600; }
+  40%  { border-color: #ffd700; box-shadow: 0 0 8px #ffd700, 0 0 25px #ffd700, 0 0 50px #ffd700; }
+  60%  { border-color: #00ff41; box-shadow: 0 0 8px #00ff41, 0 0 25px #00ff41, 0 0 50px #00ff41; }
+  80%  { border-color: #00f0ff; box-shadow: 0 0 8px #00f0ff, 0 0 25px #00f0ff, 0 0 50px #00f0ff; }
+  100% { border-color: #ff0040; box-shadow: 0 0 8px #ff0040, 0 0 25px #ff0040, 0 0 50px #ff0040; }
+}
+
+.bar-left, .bar-right, .bar-top, .bar-bottom {
+  z-index: 100;
+  pointer-events: none;
+  background-color: #ff0040;
+}
+
+.bar-left, .bar-right {
+  position: fixed;
+  top: 0;
+  width: 3px;
+  height: 100vh;
+}
+
+.bar-left {
+  left: 0;
+  box-shadow: 3px 0 15px #ff0040, 0 0 30px #ff0040;
+  animation: breatheLeft 6s ease-in-out infinite;
+}
+
+.bar-right {
+  right: 0;
+  box-shadow: -3px 0 15px #ff0040, 0 0 30px #ff0040;
+  animation: breatheRight 6s ease-in-out infinite;
+}
+
+.bar-top, .bar-bottom {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 3px;
+}
+
+.bar-top {
+  top: 0;
+  box-shadow: 0 3px 15px #ff0040, 0 0 30px #ff0040;
+  animation: breatheTop 6s ease-in-out infinite;
+}
+
+.bar-bottom {
+  bottom: 0;
+  box-shadow: 0 -3px 15px #ff0040, 0 0 30px #ff0040;
+  animation: breatheBottom 6s ease-in-out infinite;
+}
+
+@keyframes breatheLeft {
+  0%   { background-color: #ff0040; box-shadow: 3px 0 15px #ff0040, 0 0 30px #ff0040; }
+  20%  { background-color: #ff6600; box-shadow: 3px 0 15px #ff6600, 0 0 30px #ff6600; }
+  40%  { background-color: #ffd700; box-shadow: 3px 0 15px #ffd700, 0 0 30px #ffd700; }
+  60%  { background-color: #00ff41; box-shadow: 3px 0 15px #00ff41, 0 0 30px #00ff41; }
+  80%  { background-color: #00f0ff; box-shadow: 3px 0 15px #00f0ff, 0 0 30px #00f0ff; }
+  100% { background-color: #ff0040; box-shadow: 3px 0 15px #ff0040, 0 0 30px #ff0040; }
+}
+
+@keyframes breatheRight {
+  0%   { background-color: #ff0040; box-shadow: -3px 0 15px #ff0040, 0 0 30px #ff0040; }
+  20%  { background-color: #ff6600; box-shadow: -3px 0 15px #ff6600, 0 0 30px #ff6600; }
+  40%  { background-color: #ffd700; box-shadow: -3px 0 15px #ffd700, 0 0 30px #ffd700; }
+  60%  { background-color: #00ff41; box-shadow: -3px 0 15px #00ff41, 0 0 30px #00ff41; }
+  80%  { background-color: #00f0ff; box-shadow: -3px 0 15px #00f0ff, 0 0 30px #00f0ff; }
+  100% { background-color: #ff0040; box-shadow: -3px 0 15px #ff0040, 0 0 30px #ff0040; }
+}
+
+@keyframes breatheTop {
+  0%   { background-color: #ff0040; box-shadow: 0 3px 15px #ff0040, 0 0 30px #ff0040; }
+  20%  { background-color: #ff6600; box-shadow: 0 3px 15px #ff6600, 0 0 30px #ff6600; }
+  40%  { background-color: #ffd700; box-shadow: 0 3px 15px #ffd700, 0 0 30px #ffd700; }
+  60%  { background-color: #00ff41; box-shadow: 0 3px 15px #00ff41, 0 0 30px #00ff41; }
+  80%  { background-color: #00f0ff; box-shadow: 0 3px 15px #00f0ff, 0 0 30px #00f0ff; }
+  100% { background-color: #ff0040; box-shadow: 0 3px 15px #ff0040, 0 0 30px #ff0040; }
+}
+
+@keyframes breatheBottom {
+  0%   { background-color: #ff0040; box-shadow: 0 -3px 15px #ff0040, 0 0 30px #ff0040; }
+  20%  { background-color: #ff6600; box-shadow: 0 -3px 15px #ff6600, 0 0 30px #ff6600; }
+  40%  { background-color: #ffd700; box-shadow: 0 -3px 15px #ffd700, 0 0 30px #ffd700; }
+  60%  { background-color: #00ff41; box-shadow: 0 -3px 15px #00ff41, 0 0 30px #00ff41; }
+  80%  { background-color: #00f0ff; box-shadow: 0 -3px 15px #00f0ff, 0 0 30px #00f0ff; }
+  100% { background-color: #ff0040; box-shadow: 0 -3px 15px #ff0040, 0 0 30px #ff0040; }
+}
+
+.site-logo {
+  position: absolute;
+  inset: 3px;
+  width: calc(100% - 6px);
+  height: calc(100% - 6px);
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  transition: all 0.3s ease;
+}
+
+.site-logo:hover {
+  filter: brightness(1.15);
+  transform: scale(1.03);
 }
 
 header h1 {
@@ -159,6 +282,43 @@ header .scanline-header {
   border-color: var(--magenta);
   box-shadow: var(--glow-magenta);
   animation: musicPulse 2s ease-in-out infinite;
+}
+
+.music-btn.off {
+  border-color: var(--border);
+  color: var(--text-dim);
+  opacity: 0.35;
+  box-shadow: none;
+}
+
+#toggle-bars {
+  right: 73px;
+  border-color: var(--cyan);
+  color: var(--cyan);
+  text-shadow: var(--glow-cyan-text);
+}
+
+#toggle-bars.off {
+  border-color: var(--border);
+  color: var(--text-dim);
+  text-shadow: none;
+  opacity: 0.35;
+  box-shadow: none;
+}
+
+#toggle-letters {
+  right: 121px;
+  border-color: var(--cyan);
+  color: var(--cyan);
+  text-shadow: var(--glow-cyan-text);
+}
+
+#toggle-letters.off {
+  border-color: var(--border);
+  color: var(--text-dim);
+  text-shadow: none;
+  opacity: 0.35;
+  box-shadow: none;
 }
 
 @keyframes musicPulse {
@@ -852,6 +1012,7 @@ footer span {
 @media (max-width: 600px) {
   #frame-player { object-position: 40% 55%; }
   header h1 { font-size: 1.8em; letter-spacing: 2px; }
+  .logo-ring { width: 66px; height: 66px; }
   .post-card { padding: 20px; }
   .post-content { padding: 20px; }
   .gallery-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
@@ -863,4 +1024,6 @@ footer span {
   .lightbox-frame .corner-br { width: 14px; height: 14px; }
   #lightbox-close { top: -14px; right: -14px; width: 32px; height: 32px; line-height: 32px; font-size: 0.9em; }
   #search-input { max-width: 100%; font-size: 0.8em; }
+  #toggle-bars { right: 70px; border-color: var(--cyan); color: var(--cyan); text-shadow: var(--glow-cyan-text); }
+  #toggle-letters { right: 108px; border-color: var(--cyan); color: var(--cyan); text-shadow: var(--glow-cyan-text); }
 }

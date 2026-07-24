@@ -3,19 +3,30 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TIANSHAN BLOG // CYBERSPACE</title>
+  <title>中天山的博客</title>
+  <link rel="icon" type="image/png" href="ICO/favicon.png" sizes="48x48">
+  <link rel="icon" type="image/png" href="ICO/favicon-64.png" sizes="64x64">
+  <link rel="icon" type="image/x-icon" href="ICO/favicon.ico">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
   <!-- 视频背景（由 JS 动态加载） -->
   <div id="video-bg"></div>
+  <span class="bar-left"></span>
+  <span class="bar-right"></span>
+  <span class="bar-top"></span>
+  <span class="bar-bottom"></span>
 
   <!-- 头部 -->
   <header>
-    <h1>// TIANSHAN //</h1>
-    <div class="subtitle">_ <span>B</span>L<span>O</span>G _</div>
+    <div class="logo-ring"><img class="site-logo" src="images/logo.png" alt="中天山"></div>
+    <h1>// 中天山 //</h1>
+    <div class="subtitle">_ <span>博</span>客 _</div>
     <div class="scanline-header"></div>
     <div class="music-btn" id="music-btn" onclick="toggleMusic()">♪</div>
+    <span class="music-btn" id="toggle-bars" onclick="toggleBars()" title="边框开关">▦</span>
+    <span class="music-btn" id="toggle-letters" onclick="toggleLetters()" title="字母开关">A</span>
   </header>
 
   <!-- 主内容 -->
@@ -80,7 +91,7 @@
 
   <!-- 页脚 -->
   <footer>
-    <span>✦</span> TI<span>A</span>NSHAN BLOG <span>✦</span><br>
+    <span>✦</span> 中<span>天</span>山 <span>✦</span><br>
     <small>Powered by Markdown + Cyberpunk</small>
   </footer>
 
@@ -176,7 +187,7 @@
 
       var canvas = document.createElement('canvas');
       canvas.id = 'particle-trail';
-      canvas.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:9998';
+      canvas.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:10198';
       document.body.appendChild(canvas);
 
       var ctx = canvas.getContext('2d');
@@ -261,6 +272,145 @@
       }
       animate();
     })();
+  </script>
+
+
+  <!-- 边缘字母粒子特效 -->
+  <script>
+    (function() {
+      var canvas = document.createElement('canvas');
+      canvas.id = 'edge-letters';
+      canvas.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:101';
+      document.body.appendChild(canvas);
+
+      var ctx = canvas.getContext('2d');
+      var dpr = window.devicePixelRatio || 1;
+      var W, H;
+      function resize() {
+        W = window.innerWidth;
+        H = window.innerHeight;
+        canvas.width = W * dpr;
+        canvas.height = H * dpr;
+        canvas.style.width = window.innerWidth + 'px';
+        canvas.style.height = window.innerHeight + 'px';
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+      resize();
+      window.addEventListener('resize', resize);
+      // 手机版降低上限保性能
+      var isMobile = !window.matchMedia || !window.matchMedia('(pointer: fine)').matches;
+      var MAX_PARTICLES = isMobile ? 60 : 150;
+
+      var particles = [];
+      var colors = ['#ff0040', '#ff6600', '#ffd700', '#00ff41', '#00f0ff'];
+      var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+
+      function canSpawnAt(scrollY, edge) {
+        var docH = document.documentElement.scrollHeight;
+        if (edge === 2) return scrollY < 5;                    // 顶边：只在最顶部
+        if (edge === 3) return scrollY + H >= docH - 5;        // 底边：只在最底部
+        return true;                                            // 左右边：始终
+      }
+
+      function spawnParticle() {
+        var edge = Math.floor(Math.random() * 4);
+        if (!canSpawnAt(window.scrollY, edge)) return;
+        var x, y, vx, vy;
+        switch(edge) {
+          case 0:
+            x = 0;
+            y = Math.random() * H;
+            vx = Math.random() * 0.6 + 0.3;
+            vy = (Math.random() - 0.5) * 0.3;
+            break;
+          case 1:
+            x = W;
+            y = Math.random() * H;
+            vx = -(Math.random() * 0.6 + 0.3);
+            vy = (Math.random() - 0.5) * 0.3;
+            break;
+          case 2:
+            x = Math.random() * W;
+            y = 0;
+            vx = (Math.random() - 0.5) * 0.3;
+            vy = Math.random() * 0.6 + 0.3;
+            break;
+          case 3:
+            x = Math.random() * W;
+            y = H;
+            vx = (Math.random() - 0.5) * 0.3;
+            vy = -(Math.random() * 0.6 + 0.3);
+            break;
+        }
+
+        particles.push({
+          x: x, y: y, vx: vx, vy: vy,
+          char: chars[Math.floor(Math.random() * chars.length)],
+          color: colors[Math.floor(Math.random() * colors.length)],
+          size: Math.random() * 14 + 10,
+          life: 1,
+          decay: Math.random() * 0.012 + 0.002
+        });
+      }
+
+      // 每 200-500ms 随机生成一个
+      function scheduleSpawn() {
+        setTimeout(function() {
+          if (particles.length < MAX_PARTICLES) { spawnParticle(); if (Math.random() < 0.4) spawnParticle(); }
+          scheduleSpawn();
+        }, Math.random() * 100 + 50);
+      }
+      scheduleSpawn();
+
+      function animate() {
+        ctx.clearRect(0, 0, W, H);
+        for (var i = particles.length - 1; i >= 0; i--) {
+          var p = particles[i];
+          p.x += p.vx;
+          p.y += p.vy;
+          p.life -= p.decay;
+          if (p.life <= 0) {
+            particles.splice(i, 1);
+            continue;
+          }
+          var alpha = 0.5 * p.life;
+          ctx.globalAlpha = alpha;
+          ctx.font = p.size + 'px "Minecraft", monospace';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.shadowColor = p.color;
+          ctx.shadowBlur = 12;
+          ctx.fillStyle = p.color;
+          ctx.fillText(p.char, p.x, p.y);
+        }
+        ctx.shadowBlur = 0;
+        ctx.globalAlpha = 1;
+        requestAnimationFrame(animate);
+      }
+      animate();
+    })();
+  </script>
+
+
+  <!-- 开关控制 -->
+  <script>
+    var barsVisible = true;
+    var lettersVisible = true;
+
+    function toggleBars() {
+      barsVisible = !barsVisible;
+      var bars = document.querySelectorAll('.bar-left, .bar-right, .bar-top, .bar-bottom');
+      var display = barsVisible ? '' : 'none';
+      bars.forEach(function(b) { b.style.display = display; });
+      document.getElementById('toggle-bars').classList.toggle('off', !barsVisible);
+    }
+
+    function toggleLetters() {
+      lettersVisible = !lettersVisible;
+      var canvas = document.getElementById('edge-letters');
+      if (canvas) canvas.style.display = lettersVisible ? '' : 'none';
+      document.getElementById('toggle-letters').classList.toggle('off', !lettersVisible);
+    }
   </script>
 
 </body>
