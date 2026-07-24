@@ -148,8 +148,8 @@
   <!-- 赛博朋克粒子拖尾（仅 PC 鼠标有效） -->
   <script>
     (function() {
-      // 检测移动端（触摸设备跳过）
-      if ('ontouchstart' in window || navigator.maxTouchPoints > 0) return;
+      // 仅 PC 鼠标生效：检测当前主要输入设备是否为精细指针（鼠标）
+      if (!window.matchMedia || !window.matchMedia('(pointer: fine)').matches) return;
 
       var canvas = document.createElement('canvas');
       canvas.id = 'particle-trail';
