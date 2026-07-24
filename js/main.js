@@ -111,33 +111,50 @@ function renderGallery() {
   });
 }
 
-// ===== 标签筛选 =====
-var activeTag = '';
+// ===== 标签筛选（多选） =====
+var activeTags = [];
 
 function renderTags() {
   if (!blogData.tags || blogData.tags.length === 0) return;
   var container = document.getElementById('tag-filter');
   var html = '<span class="tag-filter-all tag-filter-item';
-  if (!activeTag) html += ' active';
-  html += '" onclick="filterByTag(\'\')">全部</span>';
+  if (activeTags.length === 0) html += ' active';
+  html += '" onclick="filterByTag(\'__all__\')">全部</span>';
   blogData.tags.forEach(function(t) {
     html += '<span class="tag-filter-item';
-    if (activeTag === t) html += ' active';
+    if (activeTags.indexOf(t) !== -1) html += ' active';
     html += '" onclick="filterByTag(\'' + t.replace(/'/g, "\\'") + '\')">' + t + '</span>';
   });
   container.innerHTML = html;
 }
 
 function filterByTag(tag) {
-  activeTag = tag;
+  if (tag === '__all__') {
+    activeTags = [];
+  } else {
+    var idx = activeTags.indexOf(tag);
+    if (idx !== -1) {
+      activeTags.splice(idx, 1);
+    } else {
+      activeTags.push(tag);
+    }
+  }
   renderTags();
+
   var cards = document.querySelectorAll('.post-card');
   cards.forEach(function(c, i) {
-    if (!tag) {
+    if (activeTags.length === 0) {
       c.style.display = '';
     } else {
-      var tags = blogData.posts[i].tags || [];
-      c.style.display = tags.indexOf(tag) !== -1 ? '' : 'none';
+      var postTags = blogData.posts[i].tags || [];
+      var match = true;
+      for (var j = 0; j < activeTags.length; j++) {
+        if (postTags.indexOf(activeTags[j]) === -1) {
+          match = false;
+          break;
+        }
+      }
+      c.style.display = match ? '' : 'none';
     }
   });
 }
