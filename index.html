@@ -27,6 +27,11 @@
       <span class="tab" data-tab="gallery" onclick="switchTab('gallery')">// 影像库</span>
     </div>
 
+    <!-- 搜索框 -->
+    <div class="search-box">
+      <input type="text" id="search-input" placeholder="搜索文章..." oninput="searchPosts(this.value)">
+    </div>
+
     <!-- 文章列表 -->
     <div id="post-list"></div>
 

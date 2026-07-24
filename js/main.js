@@ -147,6 +147,42 @@ function switchTab(name) {
   }
 }
 
+// ===== 搜索文章 =====
+function searchPosts(keyword) {
+  var cards = document.querySelectorAll('.post-card');
+  var noResult = document.getElementById('search-none');
+
+  if (!keyword.trim()) {
+    cards.forEach(function(c) { c.style.display = ''; });
+    if (noResult) noResult.style.display = 'none';
+    return;
+  }
+
+  var kw = keyword.toLowerCase();
+  var found = false;
+
+  cards.forEach(function(c, i) {
+    var text = (blogData.posts[i].title + ' ' +
+                blogData.posts[i].tags.join(' ') + ' ' +
+                blogData.posts[i].preview).toLowerCase();
+    if (text.indexOf(kw) !== -1) {
+      c.style.display = '';
+      found = true;
+    } else {
+      c.style.display = 'none';
+    }
+  });
+
+  if (!noResult) {
+    noResult = document.createElement('div');
+    noResult.id = 'search-none';
+    noResult.style.cssText = 'text-align:center;padding:40px 20px;color:var(--text-dim);font-size:0.9em;';
+    noResult.textContent = '没有找到匹配的文章';
+    document.getElementById('post-list').appendChild(noResult);
+  }
+  noResult.style.display = found ? 'none' : 'block';
+}
+
 // ===== 图片放大查看 =====
 function openLightbox(src) {
   var lb = document.getElementById('lightbox');
