@@ -534,14 +534,26 @@ header .scanline-header {
 #lightbox-close {
   position: absolute;
   top: 20px;
-  right: 30px;
-  font-size: 2.5em;
+  right: 20px;
+  width: 44px;
+  height: 44px;
+  line-height: 44px;
+  text-align: center;
+  font-size: 1.5em;
   color: var(--text-dim);
+  border: 1px solid var(--border);
   cursor: pointer;
-  transition: color 0.3s ease;
-  line-height: 1;
+  transition: all 0.3s ease;
   z-index: 10001;
   font-family: "Minecraft", "Consolas", "Courier New", monospace;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+#lightbox-close:hover {
+  color: var(--magenta);
+  border-color: var(--magenta);
+  box-shadow: var(--glow-magenta);
+  background: rgba(255, 0, 128, 0.1);
 }
 
 #lightbox-close:hover {
