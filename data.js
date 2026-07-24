@@ -12,11 +12,6 @@ var blogData = {
       "preview": "这是我的第一篇博客文章。  关于这个博客  - 直接在 posts/ 文件夹里新建 .md 文件就是发布新文章 - 支持 Markdown 全部语法 - 赛博朋克风格主题  代码示例    图片展示  把图片放到 images/ 文件夹，用 Markdown 引用即可：    > 「未来已来，只是分..."
     }
   ],
-  "images": [
-    {
-      "name": "ye.png",
-      "path": "images/yingxiang/ye.png"
-    }
-  ],
-  "updated": "2026-07-24T07:23:32.211Z"
+  "images": [],
+  "updated": "2026-07-24T07:44:53.657Z"
 };
