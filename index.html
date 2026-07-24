@@ -134,8 +134,8 @@
 
   <!-- marked.js -->
   <script src="js/marked.min.js"></script>
-  <!-- 博客数据 -->
-  <script src="data.js"></script>
+  <!-- 博客数据（加时间戳防缓存） -->
+  <script>document.write('<script src="data.js?_='+Date.now()+'"><\/script>');</script>
   <!-- 主脚本 -->
   <script src="js/main.js"></script>
 
