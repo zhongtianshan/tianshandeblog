@@ -188,13 +188,20 @@
         }
       }
 
-      var lastX = 0, lastY = 0;
+      var lastX = 0, lastY = 0, moved = false;
       document.addEventListener('mousemove', function(e) {
+        if (!moved) {
+          lastX = e.clientX;
+          lastY = e.clientY;
+          moved = true;
+          return;
+        }
         var dx = e.clientX - lastX;
         var dy = e.clientY - lastY;
         var dist = Math.sqrt(dx * dx + dy * dy);
-        var count = Math.min(Math.floor(dist / 3) + 1, 4);
-        addParticles(e.clientX, e.clientY, count);
+        var count = Math.min(Math.floor(dist / 4) + 1, 3);
+        // 粒子从上一帧位置冒出，形成拖尾
+        addParticles(lastX, lastY, count);
         lastX = e.clientX;
         lastY = e.clientY;
       });
