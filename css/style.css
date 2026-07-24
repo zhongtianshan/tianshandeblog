@@ -497,6 +497,43 @@ header .scanline-header {
   color: var(--text);
 }
 
+/* ===== 标签筛选 ===== */
+.tag-filter {
+  text-align: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid var(--border);
+}
+
+.tag-filter-item {
+  display: inline-block;
+  padding: 4px 14px;
+  margin: 3px 4px;
+  font-size: 0.75em;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  cursor: url('../cursors/pointer.png') 8 4, pointer;
+  transition: all 0.3s ease;
+  letter-spacing: 1px;
+}
+
+.tag-filter-item:hover {
+  border-color: var(--cyan);
+  color: var(--cyan);
+  box-shadow: var(--glow-cyan);
+}
+
+.tag-filter-item.active {
+  border-color: var(--magenta);
+  color: var(--magenta);
+  box-shadow: var(--glow-magenta);
+  text-shadow: 0 0 8px rgba(255, 0, 128, 0.4);
+}
+
+.tag-filter-all {
+  border-color: var(--border);
+}
+
 /* ===== 图片画廊 ===== */
 .gallery {
   margin-top: 40px;

@@ -65,8 +65,17 @@ if os.path.exists(images_dir):
                 'path': 'images/yingxiang/' + img
             })
 
+# 收集所有标签
+all_tags = []
+seen_tags = set()
+for p in posts:
+    for t in p['tags']:
+        if t not in seen_tags:
+            all_tags.append(t)
+            seen_tags.add(t)
+
 # 写出 data.js
-output = {'posts': posts, 'images': images, 'updated': datetime.now().isoformat()}
+output = {'posts': posts, 'images': images, 'tags': all_tags, 'updated': datetime.now().isoformat()}
 with open(output_file, 'w', encoding='utf-8') as f:
     f.write('var blogData = ' + json.dumps(output, ensure_ascii=False, indent=2) + ';')
 
