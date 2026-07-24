@@ -57,6 +57,15 @@
 
   </div>
 
+  <!-- 标签选择弹窗 -->
+  <div id="tag-picker" onclick="closeTagPicker(event)">
+    <div class="tag-picker-box">
+      <h3>选择标签</h3>
+      <div class="tag-picker-list" id="tag-picker-list"></div>
+      <button class="tag-picker-btn" onclick="applyTagPicker()">完成</button>
+    </div>
+  </div>
+
   <!-- 图片放大查看 -->
   <div id="lightbox" onclick="closeLightbox(event)">
     <div class="lightbox-frame">

@@ -116,22 +116,78 @@ function renderGallery() {
 // ===== 标签筛选（多选） =====
 var activeTags = [];
 
+var maxVisibleTags = 15;
+
 function renderTags() {
   if (!blogData.tags || blogData.tags.length === 0) return;
   var container = document.getElementById('tag-filter');
   var html = '<span class="tag-filter-all tag-filter-item';
   if (activeTags.length === 0) html += ' active';
   html += '" onclick="filterByTag(\'__all__\')">全部</span>';
-  blogData.tags.forEach(function(t) {
+
+  var showTags = blogData.tags;
+  var hasMore = showTags.length > maxVisibleTags;
+  if (hasMore) showTags = showTags.slice(0, maxVisibleTags);
+
+  showTags.forEach(function(t) {
     html += '<span class="tag-filter-item';
     if (activeTags.indexOf(t) !== -1) html += ' active';
     html += '" onclick="filterByTag(\'' + t.replace(/'/g, "\\'") + '\')">' + t + '</span>';
   });
+
+  if (hasMore) {
+    html += '<span class="tag-filter-item tag-filter-more" onclick="openTagPicker()">...</span>';
+  }
+
   container.innerHTML = html;
 }
 
-function filterByTag(tag) {
-  if (tag === '__all__') {
+// ===== 标签选择弹窗 =====
+function openTagPicker() {
+  var picker = document.getElementById('tag-picker');
+  var list = document.getElementById('tag-picker-list');
+  var html = '';
+  blogData.tags.forEach(function(t) {
+    var active = activeTags.indexOf(t) !== -1;
+    html += '<span class="tag-picker-item' + (active ? ' active' : '') + '" onclick="togglePickerTag(\'' + t.replace(/'/g, "\\'") + '\')">' + t + '</span>';
+  });
+  list.innerHTML = html;
+  picker.className = 'show';
+}
+
+function closeTagPicker(e) {
+  if (e && e.target !== e.currentTarget) return;
+  document.getElementById('tag-picker').className = '';
+}
+
+function togglePickerTag(tag) {
+  var idx = activeTags.indexOf(tag);
+  if (idx !== -1) {
+    activeTags.splice(idx, 1);
+  } else {
+    activeTags.push(tag);
+  }
+  // 更新弹窗内的选中状态
+  var items = document.querySelectorAll('.tag-picker-item');
+  items.forEach(function(el) {
+    var t = el.textContent;
+    el.className = 'tag-picker-item' + (activeTags.indexOf(t) !== -1 ? ' active' : '');
+  });
+}
+
+function applyTagPicker() {
+  document.getElementById('tag-picker').className = '';
+  renderTags();
+  // 重新筛选文章
+  filterByTag('__refresh__');
+}
+
+// 修改 filterByTag 支持 __refresh__
+var _origFilterByTag = filterByTag;
+filterByTag = function(tag) {
+  if (tag === '__refresh__') {
+    // 只刷新显示，不修改 activeTags
+  } else if (tag === '__all__') {
     activeTags = [];
   } else {
     var idx = activeTags.indexOf(tag);
@@ -142,7 +198,6 @@ function filterByTag(tag) {
     }
   }
   renderTags();
-
   var cards = document.querySelectorAll('.post-card');
   cards.forEach(function(c, i) {
     if (activeTags.length === 0) {
@@ -159,7 +214,7 @@ function filterByTag(tag) {
       c.style.display = match ? '' : 'none';
     }
   });
-}
+};
 
 // ===== 标签切换 =====
 function switchTab(name) {
