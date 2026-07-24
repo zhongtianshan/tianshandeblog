@@ -28,7 +28,8 @@ function createAudioPlayer(filename) {
   var btn = document.createElement('span');
   btn.className = 'ap-btn';
   btn.textContent = '▶';
-  btn.onclick = function() {
+  btn.onclick = function(e) {
+    if (e) e.stopPropagation();
     if (audio.paused) {
       // 暂停背景音乐
       if (typeof music !== 'undefined' && musicPlaying) {
