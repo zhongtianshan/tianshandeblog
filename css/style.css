@@ -499,6 +499,56 @@ header .scanline-header {
   border-top: 1px solid var(--border);
 }
 
+/* ===== 图片放大查看（Lightbox） ===== */
+#lightbox {
+  display: none;
+  position: fixed;
+  z-index: 10000;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.9);
+  justify-content: center;
+  align-items: center;
+  cursor: zoom-out;
+}
+
+#lightbox.show {
+  display: flex;
+}
+
+#lightbox-img {
+  max-width: 90vw;
+  max-height: 90vh;
+  object-fit: contain;
+  border: 1px solid var(--border);
+  box-shadow: 0 0 30px rgba(0, 240, 255, 0.15);
+  animation: lightboxFadeIn 0.25s ease;
+}
+
+@keyframes lightboxFadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+#lightbox-close {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  font-size: 2.5em;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: color 0.3s ease;
+  line-height: 1;
+  z-index: 10001;
+  font-family: "Minecraft", "Consolas", "Courier New", monospace;
+}
+
+#lightbox-close:hover {
+  color: var(--magenta);
+  text-shadow: 0 0 15px rgba(255, 0, 128, 0.5);
+}
+
 /* ===== 状态文字 ===== */
 #status {
   text-align: center;

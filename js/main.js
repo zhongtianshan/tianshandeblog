@@ -92,6 +92,7 @@ function renderGallery() {
       <img src="${img.path}" alt="${img.name}" loading="lazy">
       <div class="gallery-name">${img.name}</div>
     `;
+    item.onclick = function() { openLightbox(img.path); };
     grid.appendChild(item);
   });
 }
@@ -129,6 +130,29 @@ function switchTab(name) {
     list.classList.add('fade-in');
   }
 }
+
+// ===== 图片放大查看 =====
+function openLightbox(src) {
+  var lb = document.getElementById('lightbox');
+  var img = document.getElementById('lightbox-img');
+  img.src = src;
+  lb.className = 'show';
+}
+
+function closeLightbox(e) {
+  // 如果有点击事件且不是点击背景或关闭按钮，不关闭
+  if (e && e.target !== e.currentTarget && e.target.id !== 'lightbox-close') return;
+  document.getElementById('lightbox').className = '';
+  document.getElementById('lightbox-img').src = '';
+}
+
+// ESC 关闭
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    document.getElementById('lightbox').className = '';
+    document.getElementById('lightbox-img').src = '';
+  }
+});
 
 // ===== 启动 =====
 init();
