@@ -152,11 +152,9 @@ function showPost(index) {
   const postView = document.getElementById('post-view');
   const content = document.getElementById('post-content');
 
-  // 销毁上一篇文章的所有音频（包括已从 DOM 移除但闭包仍在引用的）
+  // 暂停上一篇文章的音频
   for (var i = 0; i < _inlineAudios.length; i++) {
     try { _inlineAudios[i].pause(); } catch(e) {}
-    try { _inlineAudios[i].src = ''; } catch(e) {}
-    try { _inlineAudios[i].load(); } catch(e) {}
   }
   _inlineAudios = [];
   content.innerHTML = '';
@@ -208,11 +206,9 @@ function showPost(index) {
 
 // ===== 返回列表 =====
 function goBack() {
-  // 强制停止所有内联音频（直接引用 JS 对象，不依赖 DOM 查找）
+  // 暂停所有内联音频
   for (var i = 0; i < _inlineAudios.length; i++) {
     try { _inlineAudios[i].pause(); } catch(e) {}
-    try { _inlineAudios[i].src = ''; } catch(e) {}
-    try { _inlineAudios[i].load(); } catch(e) {}
   }
   _inlineAudios = [];
   document.getElementById('post-content').innerHTML = '';
@@ -343,6 +339,11 @@ function filterByTag(tag) {
 
 // ===== 标签切换 =====
 function switchTab(name) {
+  // 切标签时暂停内联音频
+  for (var i = 0; i < _inlineAudios.length; i++) {
+    try { _inlineAudios[i].pause(); } catch(e) {}
+  }
+
   var tabs = document.querySelectorAll('.tab');
   for (var i = 0; i < tabs.length; i++) {
     tabs[i].classList.remove('tab-active');
