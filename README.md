@@ -37,11 +37,12 @@
 ## 推送流程
 
 ```bash
-# 1. 写文章：把 .md 拖进 posts/
-# 2. 更新索引（只需做这一步，不要写文章）
+# 1. 写文章：把 .md 拖进 posts/（不要碰）
+# 2. 更新索引（只需做这一步，不要写文章，不要改 README.md）
 node build.js
-# 3. 提交到 Git
-git add .
+# 3. 提交到 Git（只提交 data.js，不要提交 README.md）
+git add data.js
+git add posts/
 git commit -m "更新索引"
 # 4. 推送到 GitHub
 git push
