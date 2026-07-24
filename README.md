@@ -35,6 +35,21 @@
 - 文章图片放 `images/wenzhang/`，Markdown 里直接写文件名：`![描述](图片名.png)`
 - 画廊图片放 `images/yingxiang/`，跑 `node build.js` 后自动展示
 
+## 推送流程
+
+```bash
+# 1. 写文章：把 .md 拖进 posts/
+# 2. 更新索引
+node build.js
+# 3. 提交到 Git
+git add .
+git commit -m "写的内容"
+# 4. 推送到 GitHub
+git push
+```
+
+直接在 GitHub 网页上 `posts/` 目录里上传或编辑 `.md` 文件也可以，不过不生成 data.js 的话新文章不会显示（需配合 GitHub Actions 自动构建）。
+
 ## Git 注意事项
 
 - **可以推送的**：`posts/`、`images/`、`data.js`、`index.html`、`css/`、`js/`、`frames/`、`audio/`
