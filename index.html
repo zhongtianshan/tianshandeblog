@@ -59,8 +59,12 @@
 
   <!-- 图片放大查看 -->
   <div id="lightbox" onclick="closeLightbox(event)">
-    <span id="lightbox-close" onclick="closeLightbox()">X</span>
     <div class="lightbox-frame">
+      <span class="corner-tl"></span>
+      <span class="corner-tr"></span>
+      <span class="corner-bl"></span>
+      <span class="corner-br"></span>
+      <span id="lightbox-close" onclick="closeLightbox()">X</span>
       <img id="lightbox-img" src="" alt="">
     </div>
   </div>
