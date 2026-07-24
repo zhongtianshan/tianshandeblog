@@ -1,6 +1,10 @@
 # TIaNSHAN BLOG
 
-赛博朋克风格个人博客，纯静态。部署于 GitHub Pages。
+> 赛博朋克风格个人博客 · 纯静态 · 部署于 GitHub Pages
+
+🔗 **博客地址**: [https://zhongtianshan.github.io/tianshandeblog/](https://zhongtianshan.github.io/tianshandeblog/)
+
+---
 
 ## 项目结构
 
