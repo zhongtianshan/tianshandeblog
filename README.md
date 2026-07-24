@@ -21,14 +21,13 @@
 └── fonts/            # 自定义字体
 ```
 
-## 发布文章流程
+## 发布文章流程（给人类用户看）
 
 1. 把 `.md` 文件拖进 `posts/` 文件夹
-2. 在本机运行 `node build.js`（更新索引）
+2. 让 AI 跑 `node build.js` 更新索引
 3. `git add .` → `git commit` → `git push`
-4. GitHub Actions 自动部署
 
-也可以直接在 GitHub 网页上 `posts/` 目录里上传或编辑 `.md` 文件，然后等待自动构建。
+也可以直接在 GitHub 网页上 `posts/` 目录里上传或编辑 `.md` 文件。
 
 ### 图片
 
@@ -39,11 +38,11 @@
 
 ```bash
 # 1. 写文章：把 .md 拖进 posts/
-# 2. 更新索引
+# 2. 更新索引（只需做这一步，不要写文章）
 node build.js
 # 3. 提交到 Git
 git add .
-git commit -m "写的内容"
+git commit -m "更新索引"
 # 4. 推送到 GitHub
 git push
 ```
