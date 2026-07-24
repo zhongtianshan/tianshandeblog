@@ -9,7 +9,7 @@ function escapeHtml(text) {
 function init() {
   if (!blogData || blogData.posts.length === 0) {
     document.getElementById('status').innerHTML = `
-      <span style="color:var(--text-dim);">还没有文章<br><small>在 posts/ 文件夹里创建 .md 文件，然后运行 node build.js</small></span>
+      <span style="color:var(--text-dim);">还没有文章</span>
     `;
     return;
   }
