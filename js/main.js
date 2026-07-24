@@ -51,6 +51,8 @@ function showPost(index) {
 
   listView.style.display = 'none';
   document.getElementById('gallery').style.display = 'none';
+  document.querySelector('.search-box').style.display = 'none';
+  document.getElementById('tag-filter').style.display = 'none';
   postView.style.display = 'block';
   postView.classList.remove('fade-in');
   void postView.offsetWidth;
@@ -88,6 +90,8 @@ function showPost(index) {
 // ===== 返回列表 =====
 function goBack() {
   document.getElementById('post-view').style.display = 'none';
+  document.querySelector('.search-box').style.display = '';
+  document.getElementById('tag-filter').style.display = '';
   switchTab('posts');
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
