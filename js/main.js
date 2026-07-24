@@ -41,8 +41,13 @@ function createAudioPlayer(filename) {
         musicBtn.textContent = '♪';
         musicBtn.classList.remove('on');
       }
-      audio.play();
       btn.textContent = '⏸';
+      var promise = audio.play();
+      if (promise) {
+        promise.catch(function() {
+          btn.textContent = '▶';
+        });
+      }
     } else {
       audio.pause();
       btn.textContent = '▶';
