@@ -21,8 +21,10 @@
   --text: #c0c0d0;
   --text-dim: #606080;
   --border: #1a1a2e;
-  --glow-cyan: 0 0 10px rgba(0, 240, 255, 0.3), 0 0 40px rgba(0, 240, 255, 0.1);
-  --glow-magenta: 0 0 10px rgba(255, 0, 128, 0.3), 0 0 40px rgba(255, 0, 128, 0.1);
+  --glow-cyan: 0 0 8px rgba(0, 240, 255, 0.5), 0 0 25px rgba(0, 240, 255, 0.25), 0 0 60px rgba(0, 240, 255, 0.1);
+  --glow-magenta: 0 0 8px rgba(255, 0, 128, 0.5), 0 0 25px rgba(255, 0, 128, 0.25), 0 0 60px rgba(255, 0, 128, 0.1);
+  --glow-cyan-text: 0 0 8px rgba(0, 240, 255, 0.6), 0 0 20px rgba(0, 240, 255, 0.3);
+  --glow-magenta-text: 0 0 8px rgba(255, 0, 128, 0.6), 0 0 20px rgba(255, 0, 128, 0.3);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -104,7 +106,7 @@ header h1 {
   -webkit-text-fill-color: transparent;
   background-clip: text;
   text-shadow: none;
-  filter: drop-shadow(0 0 20px rgba(0, 240, 255, 0.3));
+  filter: drop-shadow(0 0 12px rgba(0, 240, 255, 0.4)) drop-shadow(0 0 30px rgba(255, 0, 128, 0.2));
   letter-spacing: 4px;
   margin-bottom: 10px;
 }
@@ -117,6 +119,7 @@ header .subtitle {
 
 header .subtitle span {
   color: var(--cyan);
+  text-shadow: var(--glow-cyan-text);
 }
 
 header .scanline-header {
@@ -124,6 +127,7 @@ header .scanline-header {
   height: 2px;
   margin: 20px auto 0;
   background: linear-gradient(90deg, transparent, var(--cyan), var(--magenta), transparent);
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.3), 0 0 30px rgba(255, 0, 128, 0.15);
 }
 
 /* ===== 音乐开关 ===== */
@@ -180,6 +184,7 @@ header .scanline-header {
   margin-bottom: 30px;
   padding-bottom: 15px;
   border-bottom: 1px solid var(--border);
+  box-shadow: 0 1px 0 rgba(0, 240, 255, 0.08);
 }
 
 .tab {
@@ -198,12 +203,15 @@ header .scanline-header {
 .tab:hover {
   border-color: var(--cyan);
   color: var(--cyan);
+  box-shadow: var(--glow-cyan);
+  text-shadow: var(--glow-cyan-text);
 }
 
 .tab-active {
   color: var(--cyan);
   border-color: var(--cyan);
   box-shadow: var(--glow-cyan);
+  text-shadow: var(--glow-cyan-text);
 }
 
 /* ===== 主容器 ===== */
@@ -241,8 +249,12 @@ header .scanline-header {
 
 .post-card:hover {
   border-color: var(--cyan);
-  box-shadow: var(--glow-cyan), inset 0 0 30px rgba(0, 240, 255, 0.02);
+  box-shadow: var(--glow-cyan), inset 0 0 30px rgba(0, 240, 255, 0.05);
   transform: translateX(5px);
+}
+
+.post-card:hover h2 {
+  text-shadow: 0 0 12px rgba(0, 240, 255, 0.8), 0 0 30px rgba(0, 240, 255, 0.3);
 }
 
 .post-card:hover::before {
@@ -256,6 +268,7 @@ header .scanline-header {
   color: var(--cyan);
   margin-bottom: 8px;
   letter-spacing: 1px;
+  text-shadow: var(--glow-cyan-text);
 }
 
 .post-card .meta {
@@ -272,6 +285,7 @@ header .scanline-header {
   color: var(--magenta);
   font-size: 0.75em;
   border-radius: 2px;
+  box-shadow: 0 0 6px rgba(255, 0, 128, 0.2);
 }
 
 .post-card .preview {
@@ -314,6 +328,7 @@ header .scanline-header {
   background: var(--cyan);
   color: var(--bg-primary);
   box-shadow: var(--glow-cyan);
+  text-shadow: 0 0 8px rgba(0, 240, 255, 0.5);
 }
 
 .post-content {
@@ -331,6 +346,7 @@ header .scanline-header {
   margin-bottom: 20px;
   padding-bottom: 15px;
   border-bottom: 1px solid var(--border);
+  text-shadow: var(--glow-cyan-text);
 }
 
 .post-content h2 {
@@ -339,6 +355,7 @@ header .scanline-header {
   color: var(--magenta);
   margin: 30px 0 15px;
   letter-spacing: 1px;
+  text-shadow: var(--glow-magenta-text);
 }
 
 .post-content h3 {
@@ -381,6 +398,7 @@ header .scanline-header {
   margin: 20px 0;
   overflow-x: auto;
   border-radius: 0 4px 4px 0;
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.3), -3px 0 10px rgba(0, 240, 255, 0.1);
 }
 
 .post-content pre code {
@@ -399,6 +417,7 @@ header .scanline-header {
   background: rgba(255, 0, 128, 0.05);
   color: var(--text-dim);
   font-style: italic;
+  box-shadow: -3px 0 10px rgba(255, 0, 128, 0.15);
 }
 
 .post-content img {
@@ -460,6 +479,7 @@ header .scanline-header {
   margin-bottom: 20px;
   letter-spacing: 2px;
   text-align: center;
+  text-shadow: var(--glow-magenta-text);
 }
 
 .gallery-grid {
@@ -521,8 +541,8 @@ header .scanline-header {
   max-width: 90vw;
   max-height: 90vh;
   object-fit: contain;
-  border: 1px solid var(--border);
-  box-shadow: 0 0 30px rgba(0, 240, 255, 0.15);
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.2), 0 0 60px rgba(0, 240, 255, 0.08);
   animation: lightboxFadeIn 0.25s ease;
 }
 
@@ -554,10 +574,6 @@ header .scanline-header {
   border-color: var(--magenta);
   box-shadow: var(--glow-magenta);
   background: rgba(255, 0, 128, 0.1);
-}
-
-#lightbox-close:hover {
-  color: var(--magenta);
   text-shadow: 0 0 15px rgba(255, 0, 128, 0.5);
 }
 
@@ -591,6 +607,7 @@ footer {
 
 footer span {
   color: var(--magenta);
+  text-shadow: 0 0 8px rgba(255, 0, 128, 0.5);
 }
 
 /* ===== 滚动条 ===== */
