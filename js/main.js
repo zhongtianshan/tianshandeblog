@@ -5,7 +5,9 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
-// ===== 创建文章内音频播放器 =====
+// 全局跟踪所有内联音频，确保彻底销毁
+var _inlineAudios = [];
+
 function createAudioPlayer(filename) {
   var container = document.createElement('div');
   container.className = 'audio-player';
@@ -13,6 +15,7 @@ function createAudioPlayer(filename) {
   var audio = document.createElement('audio');
   audio.src = 'yinpin/' + filename;
   audio.preload = 'metadata';
+  _inlineAudios.push(audio);
 
   var bgWasPlaying = false;
 
@@ -149,7 +152,13 @@ function showPost(index) {
   const postView = document.getElementById('post-view');
   const content = document.getElementById('post-content');
 
-  // 清空上一篇文章内容（销毁音频等资源）
+  // 销毁上一篇文章的所有音频（包括已从 DOM 移除但闭包仍在引用的）
+  for (var i = 0; i < _inlineAudios.length; i++) {
+    try { _inlineAudios[i].pause(); } catch(e) {}
+    try { _inlineAudios[i].src = ''; } catch(e) {}
+    try { _inlineAudios[i].load(); } catch(e) {}
+  }
+  _inlineAudios = [];
   content.innerHTML = '';
 
   listView.style.display = 'none';
@@ -199,13 +208,13 @@ function showPost(index) {
 
 // ===== 返回列表 =====
 function goBack() {
-  // 强制停止页面所有音频并销毁
-  var allAudios = document.querySelectorAll('audio');
-  for (var i = 0; i < allAudios.length; i++) {
-    allAudios[i].pause();
-    allAudios[i].src = '';
-    allAudios[i].load();
+  // 强制停止所有内联音频（直接引用 JS 对象，不依赖 DOM 查找）
+  for (var i = 0; i < _inlineAudios.length; i++) {
+    try { _inlineAudios[i].pause(); } catch(e) {}
+    try { _inlineAudios[i].src = ''; } catch(e) {}
+    try { _inlineAudios[i].load(); } catch(e) {}
   }
+  _inlineAudios = [];
   document.getElementById('post-content').innerHTML = '';
   document.getElementById('post-view').style.display = 'none';
   switchTab('posts');
