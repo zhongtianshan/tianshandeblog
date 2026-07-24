@@ -149,12 +149,8 @@ function showPost(index) {
   const postView = document.getElementById('post-view');
   const content = document.getElementById('post-content');
 
-  // 暂停上一篇文章的音频
-  var oldAudios = content.querySelectorAll('audio');
-  for (var i = 0; i < oldAudios.length; i++) {
-    oldAudios[i].pause();
-    oldAudios[i].currentTime = 0;
-  }
+  // 清空上一篇文章内容（销毁音频等资源）
+  content.innerHTML = '';
 
   listView.style.display = 'none';
   document.getElementById('gallery').style.display = 'none';
@@ -203,22 +199,8 @@ function showPost(index) {
 
 // ===== 返回列表 =====
 function goBack() {
-  // 暂停文章内所有音频播放
-  var audios = document.querySelectorAll('#post-content audio');
-  for (var i = 0; i < audios.length; i++) {
-    audios[i].pause();
-    audios[i].currentTime = 0;
-  }
-  // 重置所有播放按钮
-  var btns = document.querySelectorAll('.ap-btn');
-  for (var i = 0; i < btns.length; i++) {
-    btns[i].textContent = '\u25B6';
-  }
-  // 重置所有进度条
-  var bars = document.querySelectorAll('.ap-progress');
-  for (var i = 0; i < bars.length; i++) {
-    bars[i].style.width = '0%';
-  }
+  // 清空文章内容（销毁所有音频等资源）
+  document.getElementById('post-content').innerHTML = '';
   document.getElementById('post-view').style.display = 'none';
   switchTab('posts');
   window.scrollTo({ top: 0, behavior: 'smooth' });
