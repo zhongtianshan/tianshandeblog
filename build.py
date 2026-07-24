@@ -65,14 +65,13 @@ if os.path.exists(images_dir):
                 'path': 'images/yingxiang/' + img
             })
 
-# 收集所有标签
-all_tags = []
-seen_tags = set()
+# 收集所有标签，按出现频率排序（高频在前）
+tag_freq = {}
 for p in posts:
     for t in p['tags']:
-        if t not in seen_tags:
-            all_tags.append(t)
-            seen_tags.add(t)
+        tag_freq[t] = tag_freq.get(t, 0) + 1
+
+all_tags = sorted(tag_freq.keys(), key=lambda t: -tag_freq[t])
 
 # 写出 data.js
 output = {'posts': posts, 'images': images, 'tags': all_tags, 'updated': datetime.now().isoformat()}
