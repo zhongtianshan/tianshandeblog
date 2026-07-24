@@ -5,6 +5,91 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
+// ===== 创建文章内音频播放器 =====
+function createAudioPlayer(filename) {
+  var container = document.createElement('div');
+  container.className = 'audio-player';
+
+  var audio = document.createElement('audio');
+  audio.src = 'yinpin/' + filename;
+  audio.preload = 'metadata';
+
+  var btn = document.createElement('span');
+  btn.className = 'ap-btn';
+  btn.textContent = '▶';
+  btn.onclick = function() {
+    if (audio.paused) {
+      // 暂停背景音乐
+      if (typeof music !== 'undefined' && musicPlaying) {
+        music.pause();
+        musicBtn.textContent = '♪';
+        musicBtn.classList.remove('on');
+      }
+      audio.play();
+      btn.textContent = '⏸';
+    } else {
+      audio.pause();
+      btn.textContent = '▶';
+    }
+  };
+
+  var bar = document.createElement('div');
+  bar.className = 'ap-bar';
+
+  var progress = document.createElement('div');
+  progress.className = 'ap-progress';
+
+  var timeEl = document.createElement('span');
+  timeEl.className = 'ap-time';
+  timeEl.textContent = '0:00 / --:--';
+
+  var nameEl = document.createElement('span');
+  nameEl.className = 'ap-name';
+  nameEl.textContent = filename;
+
+  bar.appendChild(progress);
+  container.appendChild(btn);
+  container.appendChild(bar);
+  container.appendChild(nameEl);
+  container.appendChild(timeEl);
+
+  // 加载完成后显示总时长
+  audio.addEventListener('loadedmetadata', function() {
+    timeEl.textContent = '0:00 / ' + formatTime(audio.duration);
+  });
+
+  // 更新时间
+  audio.addEventListener('timeupdate', function() {
+    var pct = (audio.currentTime / (audio.duration || 1)) * 100;
+    progress.style.width = pct + '%';
+    if (audio.duration) {
+      timeEl.textContent = formatTime(audio.currentTime) + ' / ' + formatTime(audio.duration);
+    }
+  });
+
+  // 点击进度条跳转
+  bar.addEventListener('click', function(e) {
+    var rect = bar.getBoundingClientRect();
+    var pct = (e.clientX - rect.left) / rect.width;
+    audio.currentTime = pct * (audio.duration || 0);
+  });
+
+  // 播放结束
+  audio.addEventListener('ended', function() {
+    btn.textContent = '▶';
+    progress.style.width = '0%';
+    timeEl.textContent = '0:00 / ' + formatTime(audio.duration || 0);
+  });
+
+  return container;
+}
+
+function formatTime(s) {
+  var m = Math.floor(s / 60);
+  var sec = Math.floor(s % 60);
+  return m + ':' + (sec < 10 ? '0' : '') + sec;
+}
+
 // ===== 初始化 =====
 function init() {
   if (!blogData || blogData.posts.length === 0) {
@@ -68,11 +153,18 @@ function showPost(index) {
   const html = marked.parse(text);
   content.innerHTML = html;
 
-  // 自动补全图片路径：裸文件名 → images/wenzhang/文件名
+  // 处理图片和音频
   var imgs = content.querySelectorAll('img');
   for (var i = 0; i < imgs.length; i++) {
     var src = imgs[i].getAttribute('src');
-    if (src && src.indexOf('/') === -1) {
+    if (!src || src.indexOf('/') !== -1) continue;
+
+    if (imgs[i].getAttribute('alt') === '音频') {
+      // 音频标记：替换为播放器
+      var player = createAudioPlayer(src);
+      imgs[i].parentNode.replaceChild(player, imgs[i]);
+    } else {
+      // 普通图片：补全路径
       imgs[i].src = 'images/wenzhang/' + src;
     }
   }

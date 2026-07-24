@@ -657,6 +657,77 @@ header .scanline-header {
   color: var(--text);
 }
 
+/* ===== 文章内音频播放器 ===== */
+.audio-player {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg-glass);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--magenta);
+  padding: 10px 14px;
+  margin: 15px 0;
+  border-radius: 0 4px 4px 0;
+  box-shadow: inset 0 0 15px rgba(0,0,0,0.3), -3px 0 10px rgba(255,0,128,0.1);
+}
+
+.ap-btn {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  line-height: 32px;
+  text-align: center;
+  font-size: 0.85em;
+  border: 1px solid var(--cyan);
+  color: var(--cyan);
+  cursor: url('../cursors/pointer.png') 11 5, pointer;
+  transition: all 0.3s ease;
+  user-select: none;
+}
+
+.ap-btn:hover {
+  background: var(--cyan);
+  color: var(--bg-primary);
+  box-shadow: var(--glow-cyan);
+}
+
+.ap-bar {
+  flex: 1;
+  height: 4px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 2px;
+  cursor: url('../cursors/pointer.png') 11 5, pointer;
+  position: relative;
+}
+
+.ap-progress {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--cyan), var(--magenta));
+  border-radius: 2px;
+  box-shadow: 0 0 8px rgba(0,240,255,0.4);
+  transition: width 0.1s linear;
+}
+
+.ap-name {
+  flex-shrink: 0;
+  font-size: 0.75em;
+  color: var(--text-dim);
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ap-time {
+  flex-shrink: 0;
+  font-size: 0.7em;
+  color: var(--text-dim);
+  min-width: 40px;
+  text-align: right;
+  font-family: "Minecraft", "Consolas", "Courier New", monospace;
+}
+
 /* ===== 标签筛选 ===== */
 .tag-filter {
   text-align: center;
@@ -1024,6 +1095,9 @@ footer span {
   .lightbox-frame .corner-br { width: 14px; height: 14px; }
   #lightbox-close { top: -14px; right: -14px; width: 32px; height: 32px; line-height: 32px; font-size: 0.9em; }
   #search-input { max-width: 100%; font-size: 0.8em; }
+  .audio-player { padding: 8px 10px; gap: 8px; }
+  .ap-name { max-width: 80px; }
+  .ap-btn { width: 28px; height: 28px; line-height: 28px; }
   #toggle-bars { right: 70px; border-color: var(--cyan); color: var(--cyan); text-shadow: var(--glow-cyan-text); }
   #toggle-letters { right: 108px; border-color: var(--cyan); color: var(--cyan); text-shadow: var(--glow-cyan-text); }
 }
