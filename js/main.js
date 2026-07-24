@@ -11,11 +11,11 @@ function init() {
     document.getElementById('status').innerHTML = `
       <span style="color:var(--text-dim);">还没有文章</span>
     `;
-    return;
+  } else {
+    document.getElementById('status').style.display = 'none';
+    renderPostList();
   }
 
-  document.getElementById('status').style.display = 'none';
-  renderPostList();
   renderGallery();
 }
 
@@ -106,15 +106,23 @@ function switchTab(name) {
 
   var list = document.getElementById('post-list');
   var gallery = document.getElementById('gallery');
+  var status = document.getElementById('status');
 
   if (name === 'gallery') {
     list.style.display = 'none';
     gallery.style.display = blogData.images.length > 0 ? 'block' : 'none';
     gallery.classList.remove('fade-in');
-    void gallery.offsetWidth; // force reflow
+    void gallery.offsetWidth;
     gallery.classList.add('fade-in');
+    status.style.display = 'none';
   } else {
-    list.style.display = 'block';
+    if (blogData.posts.length === 0) {
+      list.style.display = 'none';
+      status.style.display = 'block';
+    } else {
+      list.style.display = 'block';
+      status.style.display = 'none';
+    }
     gallery.style.display = 'none';
     list.classList.remove('fade-in');
     void list.offsetWidth;
