@@ -182,9 +182,7 @@ function applyTagPicker() {
   filterByTag('__refresh__');
 }
 
-// 修改 filterByTag 支持 __refresh__
-var _origFilterByTag = filterByTag;
-filterByTag = function(tag) {
+function filterByTag(tag) {
   if (tag === '__refresh__') {
     // 只刷新显示，不修改 activeTags
   } else if (tag === '__all__') {
@@ -214,7 +212,7 @@ filterByTag = function(tag) {
       c.style.display = match ? '' : 'none';
     }
   });
-};
+}
 
 // ===== 标签切换 =====
 function switchTab(name) {
