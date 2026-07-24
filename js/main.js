@@ -90,8 +90,6 @@ function showPost(index) {
 // ===== 返回列表 =====
 function goBack() {
   document.getElementById('post-view').style.display = 'none';
-  document.querySelector('.search-box').style.display = '';
-  document.getElementById('tag-filter').style.display = '';
   switchTab('posts');
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -171,8 +169,9 @@ function switchTab(name) {
   }
   document.querySelector('.tab[data-tab="' + name + '"]').classList.add('tab-active');
 
-  // 切标签时隐藏文章阅读视图
+  // 切标签时隐藏文章阅读视图，恢复搜索框
   document.getElementById('post-view').style.display = 'none';
+  document.querySelector('.search-box').style.display = '';
 
   var list = document.getElementById('post-list');
   var gallery = document.getElementById('gallery');
