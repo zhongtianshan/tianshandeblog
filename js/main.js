@@ -56,7 +56,13 @@ function showPost(index) {
   postView.classList.add('fade-in');
 
   // 直接从 data.js 里拿内容，不 fetch
-  const html = marked.parse(post.content);
+  // 自定义链接语法：[链接](url)(名称) → 标准 markdown 链接
+  // 兼容有无反斜杠转义、有无空格
+  var text = post.content.replace(
+    /[！!]\s*\\?\[链接\\?\]\s*\(([^)]+)\)\s*\(([^)]+)\)/g,
+    '[$2]($1)'
+  );
+  const html = marked.parse(text);
   content.innerHTML = html;
 
   // 自动补全图片路径：裸文件名 → images/wenzhang/文件名
