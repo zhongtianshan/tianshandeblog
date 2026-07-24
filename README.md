@@ -3,6 +3,7 @@
 > 赛博朋克风格个人博客 · 纯静态 · 部署于 GitHub Pages
 
 🔗 **博客地址**: [https://zhongtianshan.github.io/tianshandeblog/](https://zhongtianshan.github.io/tianshandeblog/)
+📦 **GitHub 仓库**: [https://github.com/zhongtianshan/tianshandeblog](https://github.com/zhongtianshan/tianshandeblog)
 
 ---
 
