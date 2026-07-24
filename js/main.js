@@ -199,7 +199,13 @@ function showPost(index) {
 
 // ===== 返回列表 =====
 function goBack() {
-  // 清空文章内容（销毁所有音频等资源）
+  // 强制停止页面所有音频并销毁
+  var allAudios = document.querySelectorAll('audio');
+  for (var i = 0; i < allAudios.length; i++) {
+    allAudios[i].pause();
+    allAudios[i].src = '';
+    allAudios[i].load();
+  }
   document.getElementById('post-content').innerHTML = '';
   document.getElementById('post-view').style.display = 'none';
   switchTab('posts');
