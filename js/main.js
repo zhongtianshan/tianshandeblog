@@ -125,6 +125,9 @@ function switchTab(name) {
   var gallery = document.getElementById('gallery');
   var status = document.getElementById('status');
 
+  var searchInput = document.getElementById('search-input');
+  searchInput.value = '';
+  searchPosts('');
   if (name === 'gallery') {
     list.style.display = 'none';
     gallery.style.display = blogData.images.length > 0 ? 'block' : 'none';
@@ -132,6 +135,7 @@ function switchTab(name) {
     void gallery.offsetWidth;
     gallery.classList.add('fade-in');
     status.style.display = 'none';
+    searchInput.placeholder = '搜索图片...';
   } else {
     if (blogData.posts.length === 0) {
       list.style.display = 'none';
@@ -144,23 +148,50 @@ function switchTab(name) {
     list.classList.remove('fade-in');
     void list.offsetWidth;
     list.classList.add('fade-in');
+    searchInput.placeholder = '搜索文章...';
   }
 }
 
-// ===== 搜索文章 =====
+// ===== 搜索（文章 + 影像库） =====
 function searchPosts(keyword) {
-  var cards = document.querySelectorAll('.post-card');
+  var tab = document.querySelector('.tab-active');
+  var isGallery = tab && tab.getAttribute('data-tab') === 'gallery';
+  var kw = keyword.trim().toLowerCase();
   var noResult = document.getElementById('search-none');
 
-  if (!keyword.trim()) {
+  if (isGallery) {
+    // 搜索影像库
+    var items = document.querySelectorAll('.gallery-item');
+    var found = false;
+    items.forEach(function(item) {
+      var name = item.querySelector('.gallery-name').textContent.toLowerCase();
+      if (!kw || name.indexOf(kw) !== -1) {
+        item.style.display = '';
+        found = true;
+      } else {
+        item.style.display = 'none';
+      }
+    });
+    if (!noResult) {
+      noResult = document.createElement('div');
+      noResult.id = 'search-none';
+      noResult.style.cssText = 'text-align:center;padding:40px 20px;color:var(--text-dim);font-size:0.9em;';
+      document.getElementById('gallery-grid').appendChild(noResult);
+    }
+    noResult.textContent = '没有找到匹配的图片';
+    noResult.style.display = found ? 'none' : 'block';
+    return;
+  }
+
+  // 搜索文章
+  var cards = document.querySelectorAll('.post-card');
+  if (!kw) {
     cards.forEach(function(c) { c.style.display = ''; });
     if (noResult) noResult.style.display = 'none';
     return;
   }
 
-  var kw = keyword.toLowerCase();
   var found = false;
-
   cards.forEach(function(c, i) {
     var text = (blogData.posts[i].title + ' ' +
                 blogData.posts[i].tags.join(' ') + ' ' +
@@ -177,9 +208,9 @@ function searchPosts(keyword) {
     noResult = document.createElement('div');
     noResult.id = 'search-none';
     noResult.style.cssText = 'text-align:center;padding:40px 20px;color:var(--text-dim);font-size:0.9em;';
-    noResult.textContent = '没有找到匹配的文章';
     document.getElementById('post-list').appendChild(noResult);
   }
+  noResult.textContent = '没有找到匹配的文章';
   noResult.style.display = found ? 'none' : 'block';
 }
 
