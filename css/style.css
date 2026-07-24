@@ -40,6 +40,7 @@ body {
   line-height: 1.7;
   min-height: 100vh;
   overflow-x: hidden;
+  cursor: url('../cursors/arrow.cur'), auto;
 }
 
 /* ===== 视频背景 ===== */
@@ -142,7 +143,7 @@ header .scanline-header {
   font-size: 1.3em;
   border: 1px solid var(--border);
   color: var(--text-dim);
-  cursor: pointer;
+  cursor: url('../cursors/pointer.cur'), pointer;
   transition: all 0.3s ease;
   user-select: none;
 }
@@ -195,7 +196,7 @@ header .scanline-header {
   font-size: 0.9em;
   color: var(--text-dim);
   border: 1px solid var(--border);
-  cursor: pointer;
+  cursor: url('../cursors/pointer.cur'), pointer;
   transition: all 0.3s ease;
   letter-spacing: 2px;
 }
@@ -230,7 +231,7 @@ header .scanline-header {
   border-radius: 4px;
   padding: 25px 30px;
   margin-bottom: 20px;
-  cursor: pointer;
+  cursor: url('../cursors/pointer.cur'), pointer;
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
@@ -319,7 +320,7 @@ header .scanline-header {
   background: transparent;
   font-family: "Minecraft", "Consolas", "Courier New", monospace;
   font-size: 0.85em;
-  cursor: pointer;
+  cursor: url('../cursors/pointer.cur'), pointer;
   transition: all 0.3s ease;
   text-decoration: none;
 }
@@ -494,7 +495,7 @@ header .scanline-header {
   border-radius: 4px;
   overflow: hidden;
   transition: all 0.3s ease;
-  cursor: pointer;
+  cursor: url('../cursors/pointer.cur'), pointer;
 }
 
 .gallery-grid .gallery-item:hover {
@@ -530,7 +531,7 @@ header .scanline-header {
   background: rgba(0, 0, 0, 0.9);
   justify-content: center;
   align-items: center;
-  cursor: zoom-out;
+  cursor: url('../cursors/arrow.cur'), zoom-out;
 }
 
 #lightbox.show {
@@ -562,7 +563,7 @@ header .scanline-header {
   font-size: 1.5em;
   color: var(--text-dim);
   border: 1px solid var(--border);
-  cursor: pointer;
+  cursor: url('../cursors/pointer.cur'), pointer;
   transition: all 0.3s ease;
   z-index: 10001;
   font-family: "Minecraft", "Consolas", "Courier New", monospace;
