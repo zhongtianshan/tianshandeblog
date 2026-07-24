@@ -1,0 +1,556 @@
+/* ===== 赛博朋克主题 ===== */
+
+/* 自定义字体 */
+@font-face {
+  font-family: 'Minecraft';
+  src: url('../fonts/Minecraft.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+:root {
+  --bg-primary: #0a0a0f;
+  --bg-secondary: #0f0f1a;
+  --bg-card: #12121e;
+  --bg-glass: rgba(18, 18, 30, 0.75);
+  --cyan: #00f0ff;
+  --magenta: #ff0080;
+  --purple: #7000ff;
+  --green: #00ff41;
+  --yellow: #ffd700;
+  --text: #c0c0d0;
+  --text-dim: #606080;
+  --border: #1a1a2e;
+  --glow-cyan: 0 0 10px rgba(0, 240, 255, 0.3), 0 0 40px rgba(0, 240, 255, 0.1);
+  --glow-magenta: 0 0 10px rgba(255, 0, 128, 0.3), 0 0 40px rgba(255, 0, 128, 0.1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: #000000;
+  color: var(--text);
+  font-family: "Minecraft", "Consolas", "Courier New", monospace;
+  line-height: 1.7;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ===== 视频背景 ===== */
+#video-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  overflow: hidden;
+  background: #000;
+}
+
+#frame-player {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+#video-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.65);
+}
+
+/* ===== 身体 ===== */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 240, 255, 0.015) 2px,
+    rgba(0, 240, 255, 0.015) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ===== 头部 ===== */
+header {
+  position: relative;
+  z-index: 1;
+  padding: 60px 20px 40px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+}
+
+header h1 {
+  font-family: "Minecraft", "Consolas", "Courier New", monospace;
+  font-size: 2.8em;
+  font-weight: 900;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, var(--cyan), var(--magenta));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: none;
+  filter: drop-shadow(0 0 20px rgba(0, 240, 255, 0.3));
+  letter-spacing: 4px;
+  margin-bottom: 10px;
+}
+
+header .subtitle {
+  font-size: 0.9em;
+  color: var(--text-dim);
+  letter-spacing: 6px;
+}
+
+header .subtitle span {
+  color: var(--cyan);
+}
+
+header .scanline-header {
+  width: 200px;
+  height: 2px;
+  margin: 20px auto 0;
+  background: linear-gradient(90deg, transparent, var(--cyan), var(--magenta), transparent);
+}
+
+/* ===== 音乐开关 ===== */
+.music-btn {
+  position: absolute;
+  top: 20px;
+  right: 25px;
+  width: 40px;
+  height: 40px;
+  line-height: 40px;
+  text-align: center;
+  font-size: 1.3em;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  user-select: none;
+}
+
+.music-btn:hover {
+  border-color: var(--magenta);
+  color: var(--magenta);
+  box-shadow: var(--glow-magenta);
+}
+
+.music-btn.on {
+  color: var(--magenta);
+  border-color: var(--magenta);
+  box-shadow: var(--glow-magenta);
+  animation: musicPulse 2s ease-in-out infinite;
+}
+
+@keyframes musicPulse {
+  0%, 100% { box-shadow: var(--glow-magenta); }
+  50% { box-shadow: 0 0 5px rgba(255, 0, 128, 0.2), 0 0 20px rgba(255, 0, 128, 0.05); }
+}
+
+/* ===== 平滑切换动画 ===== */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+#post-list, #post-view, .gallery {
+  transition: opacity 0.25s ease;
+}
+#post-list.fade-in, #post-view.fade-in, .gallery.fade-in {
+  animation: fadeIn 0.3s ease forwards;
+}
+
+/* ===== 标签切换 ===== */
+.tabs {
+  text-align: center;
+  margin-bottom: 30px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid var(--border);
+}
+
+.tab {
+  display: inline-block;
+  padding: 8px 25px;
+  margin: 0 5px;
+  font-family: "Minecraft", "Consolas", "Courier New", monospace;
+  font-size: 0.9em;
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  letter-spacing: 2px;
+}
+
+.tab:hover {
+  border-color: var(--cyan);
+  color: var(--cyan);
+}
+
+.tab-active {
+  color: var(--cyan);
+  border-color: var(--cyan);
+  box-shadow: var(--glow-cyan);
+}
+
+/* ===== 主容器 ===== */
+.container {
+  position: relative;
+  z-index: 1;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 30px 20px;
+}
+
+/* ===== 文章卡片 ===== */
+.post-card {
+  background: var(--bg-glass);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 25px 30px;
+  margin-bottom: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.post-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 3px;
+  height: 100%;
+  background: linear-gradient(180deg, var(--cyan), var(--magenta));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.post-card:hover {
+  border-color: var(--cyan);
+  box-shadow: var(--glow-cyan), inset 0 0 30px rgba(0, 240, 255, 0.02);
+  transform: translateX(5px);
+}
+
+.post-card:hover::before {
+  opacity: 1;
+}
+
+.post-card h2 {
+  font-family: "Minecraft", "Consolas", "Courier New", monospace;
+  font-size: 1.2em;
+  font-weight: 700;
+  color: var(--cyan);
+  margin-bottom: 8px;
+  letter-spacing: 1px;
+}
+
+.post-card .meta {
+  font-size: 0.8em;
+  color: var(--text-dim);
+  margin-bottom: 10px;
+}
+
+.post-card .meta .tag {
+  display: inline-block;
+  padding: 1px 8px;
+  margin: 0 3px;
+  border: 1px solid var(--magenta);
+  color: var(--magenta);
+  font-size: 0.75em;
+  border-radius: 2px;
+}
+
+.post-card .preview {
+  font-size: 0.85em;
+  color: var(--text);
+  opacity: 0.7;
+  line-height: 1.5;
+}
+
+.post-card .post-number {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  font-family: "Minecraft", "Consolas", "Courier New", monospace;
+  font-size: 0.7em;
+  color: var(--text-dim);
+  opacity: 0.3;
+}
+
+/* ===== 文章内容页 ===== */
+#post-view {
+  display: none;
+}
+
+#post-view .back-btn {
+  display: inline-block;
+  margin-bottom: 30px;
+  padding: 8px 20px;
+  border: 1px solid var(--cyan);
+  color: var(--cyan);
+  background: transparent;
+  font-family: "Minecraft", "Consolas", "Courier New", monospace;
+  font-size: 0.85em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+#post-view .back-btn:hover {
+  background: var(--cyan);
+  color: var(--bg-primary);
+  box-shadow: var(--glow-cyan);
+}
+
+.post-content {
+  background: var(--bg-glass);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 40px;
+  line-height: 1.9;
+}
+
+.post-content h1 {
+  font-family: "Minecraft", "Consolas", "Courier New", monospace;
+  font-size: 1.8em;
+  color: var(--cyan);
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid var(--border);
+}
+
+.post-content h2 {
+  font-family: "Minecraft", "Consolas", "Courier New", monospace;
+  font-size: 1.3em;
+  color: var(--magenta);
+  margin: 30px 0 15px;
+  letter-spacing: 1px;
+}
+
+.post-content h3 {
+  font-family: "Minecraft", "Consolas", "Courier New", monospace;
+  font-size: 1.1em;
+  color: var(--yellow);
+  margin: 25px 0 12px;
+}
+
+.post-content p {
+  margin-bottom: 15px;
+  color: var(--text);
+}
+
+.post-content a {
+  color: var(--cyan);
+  text-decoration: none;
+  border-bottom: 1px dashed var(--cyan);
+}
+
+.post-content a:hover {
+  text-shadow: 0 0 8px rgba(0, 240, 255, 0.5);
+}
+
+.post-content code {
+  background: rgba(0, 240, 255, 0.1);
+  border: 1px solid rgba(0, 240, 255, 0.2);
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-family: "Minecraft", "Consolas", "Courier New", monospace;
+  font-size: 0.85em;
+  color: var(--green);
+}
+
+.post-content pre {
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--cyan);
+  padding: 20px;
+  margin: 20px 0;
+  overflow-x: auto;
+  border-radius: 0 4px 4px 0;
+}
+
+.post-content pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--green);
+  font-size: 0.8em;
+  line-height: 1.6;
+}
+
+.post-content blockquote {
+  border-left: 3px solid var(--magenta);
+  padding: 10px 20px;
+  margin: 20px 0;
+  background: rgba(255, 0, 128, 0.05);
+  color: var(--text-dim);
+  font-style: italic;
+}
+
+.post-content img {
+  max-width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  margin: 20px 0;
+}
+
+.post-content ul, .post-content ol {
+  margin: 15px 0;
+  padding-left: 25px;
+}
+
+.post-content li {
+  margin-bottom: 8px;
+}
+
+.post-content hr {
+  border: none;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+  margin: 30px 0;
+}
+
+.post-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+}
+
+.post-content th, .post-content td {
+  border: 1px solid var(--border);
+  padding: 10px 15px;
+  text-align: left;
+}
+
+.post-content th {
+  background: rgba(0, 240, 255, 0.1);
+  color: var(--cyan);
+  font-family: "Minecraft", "Consolas", "Courier New", monospace;
+  font-size: 0.8em;
+  letter-spacing: 1px;
+}
+
+.post-content td {
+  color: var(--text);
+}
+
+/* ===== 图片画廊 ===== */
+.gallery {
+  margin-top: 40px;
+}
+
+.gallery h2 {
+  font-family: "Minecraft", "Consolas", "Courier New", monospace;
+  font-size: 1.2em;
+  color: var(--magenta);
+  margin-bottom: 20px;
+  letter-spacing: 2px;
+  text-align: center;
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.gallery-grid .gallery-item {
+  position: relative;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.gallery-grid .gallery-item:hover {
+  border-color: var(--magenta);
+  box-shadow: var(--glow-magenta);
+  transform: scale(1.02);
+}
+
+.gallery-grid .gallery-item img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  display: block;
+}
+
+.gallery-grid .gallery-item .gallery-name {
+  padding: 8px 12px;
+  font-size: 0.75em;
+  color: var(--text-dim);
+  background: var(--bg-glass);
+  text-align: center;
+  border-top: 1px solid var(--border);
+}
+
+/* ===== 状态文字 ===== */
+#status {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-dim);
+  font-size: 0.9em;
+}
+
+#status .glitch {
+  animation: pulse-text 2s ease-in-out infinite;
+}
+
+@keyframes pulse-text {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+/* ===== 页脚 ===== */
+footer {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding: 30px 20px;
+  border-top: 1px solid var(--border);
+  font-size: 0.75em;
+  color: var(--text-dim);
+}
+
+footer span {
+  color: var(--magenta);
+}
+
+/* ===== 滚动条 ===== */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--cyan);
+}
+
+/* ===== 响应式 ===== */
+@media (max-width: 600px) {
+  #frame-player { object-position: 40% 55%; }
+  header h1 { font-size: 1.8em; letter-spacing: 2px; }
+  .post-card { padding: 20px; }
+  .post-content { padding: 20px; }
+  .gallery-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+}
