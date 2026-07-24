@@ -145,5 +145,87 @@
   <!-- 主脚本 -->
   <script src="js/main.js"></script>
 
+  <!-- 赛博朋克粒子拖尾（仅 PC 鼠标有效） -->
+  <script>
+    (function() {
+      // 检测移动端（触摸设备跳过）
+      if ('ontouchstart' in window || navigator.maxTouchPoints > 0) return;
+
+      var canvas = document.createElement('canvas');
+      canvas.id = 'particle-trail';
+      canvas.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:9998';
+      document.body.appendChild(canvas);
+
+      var ctx = canvas.getContext('2d');
+      var W, H;
+
+      function resize() {
+        W = canvas.width = window.innerWidth;
+        H = canvas.height = window.innerHeight;
+      }
+      resize();
+      window.addEventListener('resize', resize);
+
+      var particles = [];
+      var colors = ['#00f0ff', '#ff0080', '#7000ff', '#00ff41', '#ffd700'];
+      var maxParticles = 120;
+
+      function addParticles(x, y, count) {
+        for (var i = 0; i < count; i++) {
+          if (particles.length >= maxParticles) {
+            particles.shift();
+          }
+          particles.push({
+            x: x + (Math.random() - 0.5) * 6,
+            y: y + (Math.random() - 0.5) * 6,
+            vx: (Math.random() - 0.5) * 2,
+            vy: -Math.random() * 2 - 0.5,
+            size: Math.random() * 4 + 1,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            life: 1,
+            decay: Math.random() * 0.025 + 0.015
+          });
+        }
+      }
+
+      var lastX = 0, lastY = 0;
+      document.addEventListener('mousemove', function(e) {
+        var dx = e.clientX - lastX;
+        var dy = e.clientY - lastY;
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        var count = Math.min(Math.floor(dist / 3) + 1, 4);
+        addParticles(e.clientX, e.clientY, count);
+        lastX = e.clientX;
+        lastY = e.clientY;
+      });
+
+      function animate() {
+        ctx.clearRect(0, 0, W, H);
+        for (var i = particles.length - 1; i >= 0; i--) {
+          var p = particles[i];
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.02;
+          p.life -= p.decay;
+          if (p.life <= 0) {
+            particles.splice(i, 1);
+            continue;
+          }
+          ctx.globalAlpha = p.life;
+          ctx.fillStyle = p.color;
+          ctx.shadowColor = p.color;
+          ctx.shadowBlur = 8;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.shadowBlur = 0;
+        ctx.globalAlpha = 1;
+        requestAnimationFrame(animate);
+      }
+      animate();
+    })();
+  </script>
+
 </body>
 </html>
