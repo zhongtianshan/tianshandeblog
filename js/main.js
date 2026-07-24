@@ -68,6 +68,13 @@ function showPost(index) {
     }
   }
 
+  // 文章里的链接在新标签页打开
+  var links = content.querySelectorAll('a');
+  for (var i = 0; i < links.length; i++) {
+    links[i].setAttribute('target', '_blank');
+    links[i].setAttribute('rel', 'noopener');
+  }
+
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 

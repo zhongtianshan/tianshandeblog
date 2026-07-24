@@ -372,13 +372,13 @@ header .scanline-header {
 }
 
 .post-content a {
-  color: var(--cyan);
+  color: var(--green);
   text-decoration: none;
-  border-bottom: 1px dashed var(--cyan);
+  border-bottom: 1px dashed var(--green);
 }
 
 .post-content a:hover {
-  text-shadow: 0 0 8px rgba(0, 240, 255, 0.5);
+  text-shadow: 0 0 8px rgba(0, 255, 65, 0.5);
 }
 
 .post-content code {
