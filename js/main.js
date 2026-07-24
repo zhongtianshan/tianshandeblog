@@ -14,6 +14,17 @@ function createAudioPlayer(filename) {
   audio.src = 'yinpin/' + filename;
   audio.preload = 'metadata';
 
+  var bgWasPlaying = false;
+
+  function resumeBg() {
+    if (bgWasPlaying && typeof music !== 'undefined') {
+      music.play().catch(function(){});
+      musicBtn.textContent = '♫';
+      musicBtn.classList.add('on');
+      musicPlaying = true;
+    }
+  }
+
   var btn = document.createElement('span');
   btn.className = 'ap-btn';
   btn.textContent = '▶';
@@ -21,6 +32,7 @@ function createAudioPlayer(filename) {
     if (audio.paused) {
       // 暂停背景音乐
       if (typeof music !== 'undefined' && musicPlaying) {
+        bgWasPlaying = true;
         music.pause();
         musicBtn.textContent = '♪';
         musicBtn.classList.remove('on');
@@ -30,6 +42,7 @@ function createAudioPlayer(filename) {
     } else {
       audio.pause();
       btn.textContent = '▶';
+      resumeBg();
     }
   };
 
@@ -79,6 +92,7 @@ function createAudioPlayer(filename) {
     btn.textContent = '▶';
     progress.style.width = '0%';
     timeEl.textContent = '0:00 / ' + formatTime(audio.duration || 0);
+    resumeBg();
   });
 
   return container;
