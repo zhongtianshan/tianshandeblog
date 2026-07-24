@@ -185,6 +185,7 @@ function switchTab(name) {
     gallery.classList.add('fade-in');
     status.style.display = 'none';
     searchInput.placeholder = '搜索图片...';
+    document.getElementById('tag-filter').style.display = 'none';
   } else {
     if (blogData.posts.length === 0) {
       list.style.display = 'none';
@@ -198,6 +199,7 @@ function switchTab(name) {
     void list.offsetWidth;
     list.classList.add('fade-in');
     searchInput.placeholder = '搜索文章...';
+    document.getElementById('tag-filter').style.display = '';
   }
 }
 
