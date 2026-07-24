@@ -118,6 +118,9 @@ function switchTab(name) {
   }
   document.querySelector('.tab[data-tab="' + name + '"]').classList.add('tab-active');
 
+  // 切标签时隐藏文章阅读视图
+  document.getElementById('post-view').style.display = 'none';
+
   var list = document.getElementById('post-list');
   var gallery = document.getElementById('gallery');
   var status = document.getElementById('status');
