@@ -27,6 +27,10 @@ var blogData = {
   ],
   "images": [
     {
+      "name": "下雨.png",
+      "path": "images/yingxiang/下雨.png"
+    },
+    {
       "name": "山水.jpg",
       "path": "images/yingxiang/山水.jpg"
     }
@@ -39,5 +43,5 @@ var blogData = {
     "教程",
     "学习"
   ],
-  "updated": "2026-07-25T12:56:40.085761"
+  "updated": "2026-07-25T16:54:01.319871"
 };
