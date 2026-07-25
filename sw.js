@@ -1,8 +1,8 @@
 // ===== 天山博客 Service Worker =====
 // 帧动画 ZIP 整包缓存 + CSS/JS/HTML 网络优先
 
-var CACHE_NAME = 'tianshan-v4';
-var FRAME_CACHE = 'tianshan-frames-v4';
+var CACHE_NAME = 'tianshan-v5';
+var FRAME_CACHE = 'tianshan-frames-v5';
 
 // ===== 极简 ZIP 解析器（仅 STORE 模式，不解压 JPEG） =====
 var Zip = {
@@ -107,6 +107,22 @@ self.addEventListener('fetch', function(e) {
           if (!res || res.status !== 200) return res;
           var clone = res.clone();
           caches.open(FRAME_CACHE).then(function(c) { c.put(e.request, clone); });
+          return res;
+        });
+      })
+    );
+    return;
+  }
+
+  // 音频：缓存优先（背景音乐和文章音频都不会变）
+  if (url.indexOf('/audio/') !== -1 || url.indexOf('/yinpin/') !== -1) {
+    e.respondWith(
+      caches.match(e.request).then(function(cached) {
+        if (cached) return cached;
+        return fetch(e.request).then(function(res) {
+          if (!res || res.status !== 200) return res;
+          var clone = res.clone();
+          caches.open(CACHE_NAME).then(function(c) { c.put(e.request, clone); });
           return res;
         });
       })
