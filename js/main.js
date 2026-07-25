@@ -23,8 +23,7 @@ function createAudioPlayer(filename) {
   function resumeBg() {
     if (_bgSavedState.wasPlaying && typeof music !== 'undefined') {
       music.play().catch(function(){});
-      musicBtn.textContent = '♫';
-      musicBtn.classList.add('on');
+      if (musicBtn) { musicBtn.textContent = '♫'; musicBtn.classList.add('on'); }
       musicPlaying = true;
       _bgSavedState.wasPlaying = false;
     }
@@ -36,15 +35,15 @@ function createAudioPlayer(filename) {
   btn.onclick = function(e) {
     if (e) e.stopPropagation();
     if (audio.paused) {
+      // 先更新按钮状态，再处理背景音乐（避免 musicBtn 问题卡住）
+      btn.textContent = '⏸';
       // 暂停背景音乐
       if (typeof music !== 'undefined' && musicPlaying) {
         _bgSavedState.wasPlaying = true;
         _bgSavedState.currentTime = music.currentTime;
         music.pause();
-        musicBtn.textContent = '♪';
-        musicBtn.classList.remove('on');
+        if (musicBtn) { musicBtn.textContent = '♪'; musicBtn.classList.remove('on'); }
       }
-      btn.textContent = '⏸';
       var promise = audio.play();
       if (promise) {
         promise.catch(function() {
