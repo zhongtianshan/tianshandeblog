@@ -154,6 +154,7 @@
     }
 
     musicBtn.classList.add('loading');
+    _syncMusicUI();
 
     function _syncMusicUI() {
       musicBtn.textContent = musicPlaying ? '♫' : '♪';
@@ -214,26 +215,6 @@
       musicPlaying = false;
       _syncMusicUI();
     }
-
-    // ===== 自动播放 =====
-
-    // 1. 立刻尝试
-    _playWasm(0);
-
-    // 2. 600ms 更新按钮状态
-    setTimeout(function() {
-      _syncMusicUI();
-    }, 600);
-
-    // 3. 首次交互：点页面任何地方启动（但不与音乐按钮冲突）
-    function _firstTap(e) {
-      if (e.target === musicBtn || e.target.closest('#music-btn')) return;
-      if (!musicPlaying) { _playWasm(0); }
-      document.removeEventListener('click', _firstTap);
-      document.removeEventListener('touchstart', _firstTap);
-    }
-    document.addEventListener('click', _firstTap);
-    document.addEventListener('touchstart', _firstTap);
 
     function toggleMusic() {
       if (musicPlaying) {
