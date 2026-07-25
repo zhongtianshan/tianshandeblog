@@ -114,8 +114,8 @@ self.addEventListener('fetch', function(e) {
     return;
   }
 
-  // 音频：缓存优先（背景音乐和文章音频都不会变）
-  if (url.indexOf('/audio/') !== -1 || url.indexOf('/yinpin/') !== -1) {
+  // 背景音乐：缓存优先（永不变更）
+  if (url.indexOf('/audio/') !== -1) {
     e.respondWith(
       caches.match(e.request).then(function(cached) {
         if (cached) return cached;
