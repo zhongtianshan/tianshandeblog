@@ -16,7 +16,8 @@ function createAudioPlayer(filename) {
 
   var audio = document.createElement('audio');
   audio.src = 'yinpin/' + filename;
-  audio.preload = 'metadata';
+  audio.preload = 'auto';
+  audio.load();
   _inlineAudios.push(audio);
 
   function resumeBg() {
@@ -35,10 +36,6 @@ function createAudioPlayer(filename) {
   btn.onclick = function(e) {
     if (e) e.stopPropagation();
     if (audio.paused) {
-      // 每次播放时重置音频状态，确保可播放
-      audio.pause();
-      audio.src = 'yinpin/' + filename;
-      audio.load();
       // 暂停背景音乐
       if (typeof music !== 'undefined' && musicPlaying) {
         _bgSavedState.wasPlaying = true;
