@@ -34,6 +34,13 @@
       <div class="hm-item" onclick="toggleMusic();closeHamburger()">♪ 背景音乐</div>
       <div class="hm-item" onclick="toggleBars();closeHamburger()">▦ 边框</div>
       <div class="hm-item" onclick="toggleLetters();closeHamburger()">A 字母粒子</div>
+      <div class="hm-item hm-slider-item">
+        <span class="hm-slider-label">☀ 背景亮度</span>
+        <div class="hm-slider" id="bg-brightness-slider">
+          <div class="hm-slider-track"><div class="hm-slider-fill" id="bg-brightness-fill"></div></div>
+          <div class="hm-slider-thumb" id="bg-brightness-thumb"></div>
+        </div>
+      </div>
     </div>
   </header>
 
@@ -514,6 +521,65 @@
       var open = menu.classList.toggle('open');
       btn.classList.toggle('open', open);
     }
+
+    // ===== 背景亮度滑条（磁铁吸附 + 震动） =====
+    (function() {
+      var overlay = document.getElementById('video-overlay');
+      if (!overlay) return;
+      var DEF = 65, SNAP = 5;
+      var cur = DEF, inSnap = false;
+      var s = document.getElementById('bg-brightness-slider');
+      var f = document.getElementById('bg-brightness-fill');
+      if (!s) return;
+
+      function set(v) {
+        cur = Math.max(0, Math.min(100, v));
+        overlay.style.background = 'rgba(0,0,0,' + (cur/100) + ')';
+        f.style.width = cur + '%';
+      }
+
+      function pos(e) {
+        var r = s.getBoundingClientRect();
+        var x = e.touches ? e.touches[0].clientX : e.clientX;
+        return Math.max(0, Math.min(100, (x - r.left) / r.width * 100));
+      }
+
+      function start(e) {
+        e.preventDefault();
+        var p = pos(e);
+        inSnap = Math.abs(p - DEF) <= SNAP;
+        set(p);
+
+        function move(e) {
+          e.preventDefault();
+          var p = pos(e);
+          var now = Math.abs(p - DEF) <= SNAP;
+          if (now && !inSnap && navigator.vibrate) navigator.vibrate(10);
+          inSnap = now;
+          set(p);
+        }
+        function end() {
+          if (Math.abs(cur - DEF) <= SNAP) {
+            set(DEF);
+            if (navigator.vibrate) navigator.vibrate(15);
+          }
+          document.removeEventListener('mousemove', move);
+          document.removeEventListener('mouseup', end);
+          document.removeEventListener('touchmove', move);
+          document.removeEventListener('touchend', end);
+          document.removeEventListener('touchcancel', end);
+        }
+        document.addEventListener('mousemove', move);
+        document.addEventListener('mouseup', end);
+        document.addEventListener('touchmove', move, { passive: false });
+        document.addEventListener('touchend', end);
+        document.addEventListener('touchcancel', end);
+      }
+
+      set(DEF);
+      s.addEventListener('mousedown', start);
+      s.addEventListener('touchstart', start, { passive: false });
+    })();
 
     function closeHamburger() {
       var btn = document.getElementById('hamburger');
