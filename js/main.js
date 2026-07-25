@@ -553,5 +553,35 @@ document.addEventListener('keydown', function(e) {
   });
 })();
 
+// ===== Logo 彩蛋：头像连击 =====
+(function() {
+  if (!navigator.vibrate) return;
+  var logo = document.querySelector('.site-logo');
+  if (!logo) return;
+  var lastTap = 0;
+
+  logo.addEventListener('click', function(e) {
+    var now = Date.now();
+    var interval = now - lastTap;
+    lastTap = now;
+
+    // 点得越快震得越狠
+    var vib = 12;
+    if (interval < 120) {
+      vib = Math.min(130, Math.round(80 * (120 - interval) / 120 + 50));
+    } else if (interval < 300) {
+      vib = 35;
+    } else if (interval < 600) {
+      vib = 18;
+    }
+    navigator.vibrate(vib);
+
+    // 缩放动画
+    logo.classList.remove('tapped');
+    void logo.offsetWidth;
+    logo.classList.add('tapped');
+  });
+})();
+
 // ===== 启动 =====
 init();

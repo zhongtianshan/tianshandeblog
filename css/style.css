@@ -221,6 +221,20 @@ header {
   transform: scale(1.03);
 }
 
+/* Logo 彩蛋：点击缩放 */
+.site-logo.tapped {
+  animation: logoTap 0.3s ease;
+  cursor: url('../cursors/pointer.png') 11 5, pointer;
+}
+
+@keyframes logoTap {
+  0%   { transform: scale(1); }
+  25%  { transform: scale(0.78); }
+  55%  { transform: scale(1.08); }
+  80%  { transform: scale(0.96); }
+  100% { transform: scale(1); }
+}
+
 header h1 {
   font-family: "Minecraft", "Consolas", "Courier New", monospace;
   font-size: 2.8em;
