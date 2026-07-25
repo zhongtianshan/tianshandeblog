@@ -467,7 +467,7 @@ header .scanline-header {
   height: 6px;
   margin-left: -3px;
   margin-top: -3px;
-  background: rgba(255,255,255,0.7);
+  background: rgba(255,255,255,0.5);
   border-radius: 50%;
   pointer-events: none;
   z-index: 1;
@@ -478,6 +478,8 @@ header .scanline-header {
   background: linear-gradient(90deg, var(--cyan), var(--magenta));
   border-radius: 2px;
   transition: width 0.1s ease;
+  position: relative;
+  z-index: 2;
 }
 .hm-slider-thumb {
   position: absolute;
@@ -489,6 +491,7 @@ header .scanline-header {
   margin-top: -8px;
   background: var(--cyan);
   border: 2px solid #fff;
+  z-index: 3;
   border-radius: 50%;
   box-shadow: 0 0 10px rgba(0,240,255,0.5);
   transition: left 0.1s ease;
