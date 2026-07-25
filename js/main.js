@@ -21,7 +21,12 @@ function createAudioPlayer(filename) {
   _inlineAudios.push(audio);
 
   function resumeBg() {
-    resumeBgMusic();
+    if (_bgSavedState.wasPlaying) {
+      if (typeof _playWasm === 'function') {
+        _playWasm(_bgSavedState.currentTime || 0);
+      }
+      _bgSavedState.wasPlaying = false;
+    }
   }
 
   var btn = document.createElement('span');
@@ -35,7 +40,7 @@ function createAudioPlayer(filename) {
       // 暂停背景音乐
       if (typeof _stopWasm === 'function' && musicPlaying) {
         _bgSavedState.wasPlaying = true;
-        _bgSavedState.currentTime = _ctx ? (_ctx.currentTime || 0) - _startTime : _fallbackAudio.currentTime;
+        _bgSavedState.currentTime = _source ? (_ctx.currentTime || 0) - _startTime : (_fallbackAudio.currentTime || 0);
         _pauseTime = _bgSavedState.currentTime;
         _stopWasm();
         if (typeof _fallbackAudio !== 'undefined') _fallbackAudio.pause();
@@ -216,8 +221,6 @@ function resumeBgMusic() {
     if (typeof _playWasm === 'function') {
       _playWasm(_bgSavedState.currentTime || 0);
     }
-    if (musicBtn) { musicBtn.textContent = '♫'; musicBtn.classList.add('on'); }
-    musicPlaying = true;
     _bgSavedState.wasPlaying = false;
   }
 }
