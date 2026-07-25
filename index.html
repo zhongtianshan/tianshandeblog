@@ -543,12 +543,17 @@
         { s: document.getElementById('bg-brightness-pc'), f: document.getElementById('bg-brightness-fill-pc'), t: document.getElementById('bg-brightness-thumb-pc') }
       ].filter(function(o) { return o.s; });
 
-      function set(v) {
+      function set(v, snap) {
         cur = Math.max(0, Math.min(100, v));
         overlay.style.background = 'rgba(0,0,0,' + (cur/100) + ')';
         sliders.forEach(function(o) {
           o.f.style.width = cur + '%';
-          if (o.t) o.t.style.left = cur + '%';
+          if (o.t) {
+            o.t.style.left = cur + '%';
+            o.t.classList.toggle('snapping', !!snap);
+            if (!snap) o.t.classList.add('no-transition');
+            else o.t.classList.remove('no-transition');
+          }
         });
       }
 
@@ -577,8 +582,11 @@
         }
         function end() {
           if (Math.abs(cur - DEF) <= SNAP) {
-            set(DEF);
+            set(DEF, true);
             if (navigator.vibrate) navigator.vibrate(15);
+            setTimeout(function() {
+              sliders.forEach(function(o) { if (o.t) o.t.classList.remove('snapping'); });
+            }, 300);
           }
           activeSlider = null;
           document.removeEventListener('mousemove', move);

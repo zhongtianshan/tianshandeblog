@@ -345,6 +345,13 @@ header .scanline-header {
   text-shadow: var(--glow-cyan-text);
 }
 
+#toggle-brightness {
+  right: 169px;
+  border-color: var(--cyan);
+  color: var(--cyan);
+  text-shadow: var(--glow-cyan-text);
+}
+
 #toggle-letters.off {
   border-color: var(--border);
   color: var(--text-dim);
@@ -474,8 +481,11 @@ header .scanline-header {
   transition: left 0.1s ease;
   pointer-events: none;
 }
+.hm-slider-thumb.no-transition {
+  transition: none !important;
+}
 .hm-slider-thumb.snapping {
-  transition: left 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: left 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
 }
 
 /* ===== PC 版亮度弹窗 ===== */
