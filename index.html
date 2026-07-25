@@ -274,18 +274,21 @@
         return (x < 10 ? '000' : x < 100 ? '00' : x < 1000 ? '0' : '') + x;
       }
 
-      // 显示第一帧
+      // 第 1 步：先加载第一张背景图
       img.src = 'frames/f_' + pad(1) + '.jpg';
 
-      // 逐帧播放（不批量预加载）
-      // 第一轮逐帧 HTTP 加载，SW 自动缓存每帧
-      // 第二轮起全部从 SW 缓存走，零网络
-      setInterval(function() {
-        if (!running) return;
-        cur++;
-        if (cur > total) cur = 1;
-        img.src = 'frames/f_' + pad(cur) + '.jpg';
-      }, 1000 / fps);
+      // 第 2 步：第一帧显示后等 3 秒，让背景音乐先下载
+      // 第 3 步：再启动逐帧播放，SW 自动缓存每帧
+      img.onload = function() {
+        setTimeout(function() {
+          setInterval(function() {
+            if (!running) return;
+            cur++;
+            if (cur > total) cur = 1;
+            img.src = 'frames/f_' + pad(cur) + '.jpg';
+          }, 1000 / fps);
+        }, 3000);
+      };
     })();
   </script>
 
@@ -657,7 +660,7 @@
   <!-- 注册 Service Worker：缓存帧动画到本地设备 -->
   <script>
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js?v=8').catch(function() {});
+      navigator.serviceWorker.register('sw.js').catch(function() {});
     }
   </script>
 
