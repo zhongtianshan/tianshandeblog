@@ -483,7 +483,7 @@ header .scanline-header {
   display: none;
   position: absolute;
   top: 58px;
-  right: 120px;
+  right: 48px;
   z-index: 10199;
   width: 180px;
   padding: 12px 16px;
@@ -493,6 +493,9 @@ header .scanline-header {
   box-shadow: 0 4px 20px rgba(0,0,0,0.6), 0 0 15px rgba(0,240,255,0.1);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+}
+@media (max-width: 768px) {
+  .brightness-popup { right: 20px; }
 }
 .brightness-popup.open {
   display: block;

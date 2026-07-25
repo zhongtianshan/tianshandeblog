@@ -539,14 +539,17 @@
       var cur = DEF, inSnap = false;
       // 两个 slider 实例：汉堡菜单 + PC 弹窗
       var sliders = [
-        { s: document.getElementById('bg-brightness-slider'), f: document.getElementById('bg-brightness-fill') },
-        { s: document.getElementById('bg-brightness-pc'), f: document.getElementById('bg-brightness-fill-pc') }
+        { s: document.getElementById('bg-brightness-slider'), f: document.getElementById('bg-brightness-fill'), t: document.getElementById('bg-brightness-thumb') },
+        { s: document.getElementById('bg-brightness-pc'), f: document.getElementById('bg-brightness-fill-pc'), t: document.getElementById('bg-brightness-thumb-pc') }
       ].filter(function(o) { return o.s; });
 
       function set(v) {
         cur = Math.max(0, Math.min(100, v));
         overlay.style.background = 'rgba(0,0,0,' + (cur/100) + ')';
-        sliders.forEach(function(o) { o.f.style.width = cur + '%'; });
+        sliders.forEach(function(o) {
+          o.f.style.width = cur + '%';
+          if (o.t) o.t.style.left = cur + '%';
+        });
       }
 
       var activeSlider = null;
