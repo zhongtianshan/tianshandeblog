@@ -289,8 +289,8 @@
 
   <!-- marked.js -->
   <script src="js/marked.min.js?v=202607250002"></script>
-  <!-- 博客数据（加时间戳防缓存） -->
-  <script src="data.js?v=202607250002"></script>
+  <!-- 博客数据（每次从网络拉取，不用缓存） -->
+  <script>document.write('<script src="data.js?t=' + Date.now() + '"><\/script>');</script>
   <!-- 主脚本 -->
   <script src="js/main.js?v=202607250002"></script>
 
