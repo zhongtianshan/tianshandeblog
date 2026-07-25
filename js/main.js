@@ -7,6 +7,8 @@ function escapeHtml(text) {
 
 // 全局跟踪所有内联音频，确保彻底销毁
 var _inlineAudios = [];
+// 记录背景音乐被文章音频暂停前的状态
+var _bgSavedState = { wasPlaying: false };
 
 function createAudioPlayer(filename) {
   var container = document.createElement('div');
@@ -17,14 +19,13 @@ function createAudioPlayer(filename) {
   audio.preload = 'metadata';
   _inlineAudios.push(audio);
 
-  var bgWasPlaying = false;
-
   function resumeBg() {
-    if (bgWasPlaying && typeof music !== 'undefined') {
+    if (_bgSavedState.wasPlaying && typeof music !== 'undefined') {
       music.play().catch(function(){});
       musicBtn.textContent = '♫';
       musicBtn.classList.add('on');
       musicPlaying = true;
+      _bgSavedState.wasPlaying = false;
     }
   }
 
@@ -40,7 +41,8 @@ function createAudioPlayer(filename) {
       audio.load();
       // 暂停背景音乐
       if (typeof music !== 'undefined' && musicPlaying) {
-        bgWasPlaying = true;
+        _bgSavedState.wasPlaying = true;
+        _bgSavedState.currentTime = music.currentTime;
         music.pause();
         musicBtn.textContent = '♪';
         musicBtn.classList.remove('on');
@@ -166,6 +168,8 @@ function showPost(index) {
     try { _inlineAudios[i].pause(); } catch(e) {}
   }
   _inlineAudios = [];
+  // 切文章时恢复背景音乐
+  resumeBgMusic();
   content.innerHTML = '';
 
   listView.style.display = 'none';
@@ -214,12 +218,25 @@ function showPost(index) {
 }
 
 // ===== 返回列表 =====
+function resumeBgMusic() {
+  if (_bgSavedState.wasPlaying && typeof music !== 'undefined' && music.paused) {
+    music.currentTime = _bgSavedState.currentTime || 0;
+    music.play().catch(function(){});
+    musicBtn.textContent = '♫';
+    musicBtn.classList.add('on');
+    musicPlaying = true;
+    _bgSavedState.wasPlaying = false;
+  }
+}
+
 function goBack() {
   // 暂停所有内联音频
   for (var i = 0; i < _inlineAudios.length; i++) {
     try { _inlineAudios[i].pause(); } catch(e) {}
   }
   _inlineAudios = [];
+  // 恢复被文章音频暂停的背景音乐
+  resumeBgMusic();
   document.getElementById('post-content').innerHTML = '';
   document.getElementById('post-view').style.display = 'none';
   switchTab('posts');
@@ -352,6 +369,8 @@ function switchTab(name) {
   for (var i = 0; i < _inlineAudios.length; i++) {
     try { _inlineAudios[i].pause(); } catch(e) {}
   }
+  // 恢复被文章音频暂停的背景音乐
+  resumeBgMusic();
 
   var tabs = document.querySelectorAll('.tab');
   for (var i = 0; i < tabs.length; i++) {
