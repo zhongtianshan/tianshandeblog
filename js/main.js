@@ -556,11 +556,11 @@ document.addEventListener('keydown', function(e) {
 // ===== Logo 彩蛋：头像连击 =====
 (function() {
   if (!navigator.vibrate) return;
-  var logo = document.querySelector('.site-logo');
-  if (!logo) return;
+  var ring = document.querySelector('.logo-ring');
+  if (!ring) return;
   var lastTap = 0;
 
-  logo.addEventListener('click', function(e) {
+  ring.addEventListener('click', function(e) {
     var now = Date.now();
     var interval = now - lastTap;
     lastTap = now;
@@ -576,10 +576,10 @@ document.addEventListener('keydown', function(e) {
     }
     navigator.vibrate(vib);
 
-    // 缩放动画
-    logo.classList.remove('tapped');
-    void logo.offsetWidth;
-    logo.classList.add('tapped');
+    // 整个 logo-ring 缩放（图片 + 外圈一起）
+    ring.classList.remove('tapped');
+    void ring.offsetWidth;
+    ring.classList.add('tapped');
   });
 })();
 

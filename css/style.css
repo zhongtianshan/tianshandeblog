@@ -221,9 +221,11 @@ header {
   transform: scale(1.03);
 }
 
-/* Logo 彩蛋：点击缩放 */
-.site-logo.tapped {
+/* Logo 彩蛋：点击缩放（连同外圈一起） */
+.logo-ring.tapped {
   animation: logoTap 0.3s ease;
+}
+.logo-ring.tapped .site-logo {
   cursor: url('../cursors/pointer.png') 11 5, pointer;
 }
 
