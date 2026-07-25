@@ -189,18 +189,16 @@ function showPost(index) {
     '[$2]($1)'
   );
   const html = marked.parse(text);
+  content.innerHTML = html;
 
-  // 先在离 DOM 的容器里处理图片和音频，避免浏览器预加载错误路径
-  var tmpDiv = document.createElement('div');
-  tmpDiv.innerHTML = html;
-
-  var imgs = tmpDiv.querySelectorAll('img');
+  // 处理图片和音频
+  var imgs = content.querySelectorAll('img');
   for (var i = 0; i < imgs.length; i++) {
     var src = imgs[i].getAttribute('src');
     if (!src || src.indexOf('/') !== -1) continue;
 
     if (imgs[i].getAttribute('alt') === '音频') {
-      // 音频标记：替换为播放器（浏览器不会加载离 DOM 的 img）
+      // 音频标记：替换为播放器
       var player = createAudioPlayer(src);
       imgs[i].parentNode.replaceChild(player, imgs[i]);
     } else {
@@ -208,9 +206,6 @@ function showPost(index) {
       imgs[i].src = 'images/wenzhang/' + src;
     }
   }
-
-  // 处理完后再插入 DOM
-  content.innerHTML = tmpDiv.innerHTML;
 
   // 文章里的链接在新标签页打开
   var links = content.querySelectorAll('a');
