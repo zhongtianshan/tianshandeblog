@@ -651,7 +651,12 @@
   <!-- 注册 Service Worker：缓存帧动画到本地设备 -->
   <script>
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js').catch(function() {});
+      navigator.serviceWorker.register('sw.js').then(function(reg) {
+        reg.update();
+        if (reg.waiting) {
+          reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+        }
+      }).catch(function() {});
     }
   </script>
 

@@ -7,6 +7,12 @@ self.addEventListener('install', function(e) {
   e.waitUntil(self.skipWaiting());
 });
 
+self.addEventListener('message', function(e) {
+  if (e.data && e.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
+
 self.addEventListener('activate', function(e) {
   e.waitUntil(
     caches.keys().then(function(keys) {
