@@ -560,26 +560,42 @@ document.addEventListener('keydown', function(e) {
   var lastTap = 0;
   var longTimer = null;
   var holding = false;
+  var vibeTimer = null;
+
+  function startVibe() {
+    if (!navigator.vibrate || vibeTimer) return;
+    navigator.vibrate(60);
+    vibeTimer = setInterval(function() {
+      navigator.vibrate(60);
+    }, 100);
+  }
+
+  function stopVibe() {
+    if (vibeTimer) {
+      clearInterval(vibeTimer);
+      vibeTimer = null;
+    }
+    if (navigator.vibrate) navigator.vibrate(0);
+  }
 
   function onPress(e) {
     if (e.type === 'mousedown' && e.button !== 0) return;
     // 阻止浏览器长按弹出菜单（保存图片等）
     e.preventDefault();
     holding = false;
-    var startTime = Date.now();
 
     longTimer = setTimeout(function() {
       holding = true;
       ring.classList.add('pressed');
-      if (navigator.vibrate) navigator.vibrate(5000);
+      startVibe();
     }, 250);
 
     function onRelease() {
       clearTimeout(longTimer);
+      stopVibe();
       if (holding) {
-        // 长按松手：放大回去 + 停震动
+        // 长按松手：放大回去
         ring.classList.remove('pressed');
-        if (navigator.vibrate) navigator.vibrate(0);
       } else {
         // 短点：连击判定 + 按节奏震动 + 弹动动画
         var now = Date.now();
