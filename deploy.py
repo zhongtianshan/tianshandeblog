@@ -8,7 +8,7 @@ subprocess.run(['python', 'build.py'], check=True)
 
 # 2. 提交
 print('==> 提交到 Git...')
-subprocess.run(['git', 'add', '-A'], check=True)
+subprocess.run(['git', 'add', 'data.js', 'images/'], check=True)
 # 检查是否有变更，有才提交
 r = subprocess.run(['git', 'diff', '--cached', '--quiet'])
 if r.returncode == 0:
