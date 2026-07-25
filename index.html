@@ -8,6 +8,7 @@
   <link rel="icon" type="image/png" href="ICO/favicon-64.png" sizes="64x64">
   <link rel="icon" type="image/x-icon" href="ICO/favicon.ico">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <meta name="theme-color" content="#0a0a0f">
   <link rel="stylesheet" href="css/style.css?v=202607250001">
 </head>
 <body>
@@ -410,6 +411,13 @@
       var canvas = document.getElementById('edge-letters');
       if (canvas) canvas.style.display = lettersVisible ? '' : 'none';
       document.getElementById('toggle-letters').classList.toggle('off', !lettersVisible);
+    }
+  </script>
+
+  <!-- 注册 Service Worker：缓存帧动画到本地设备 -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(function() {});
     }
   </script>
 

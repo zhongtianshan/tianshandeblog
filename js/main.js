@@ -500,5 +500,39 @@ document.addEventListener('keydown', function(e) {
   }
 });
 
+// 手机端下滑关闭 Lightbox
+(function() {
+  var lb = document.getElementById('lightbox');
+  var startY = 0, moving = false;
+
+  lb.addEventListener('touchstart', function(e) {
+    if (e.target === e.currentTarget || e.target.id === 'lightbox-img') {
+      startY = e.touches[0].clientY;
+      moving = true;
+    }
+  }, { passive: true });
+
+  lb.addEventListener('touchmove', function(e) {
+    if (!moving) return;
+    var dy = e.touches[0].clientY - startY;
+    if (dy > 0) {
+      lb.style.transition = 'none';
+      lb.style.transform = 'translateY(' + dy + 'px)';
+    }
+  }, { passive: true });
+
+  lb.addEventListener('touchend', function(e) {
+    if (!moving) return;
+    moving = false;
+    var dy = e.changedTouches[0].clientY - startY;
+    lb.style.transition = '';
+    lb.style.transform = '';
+    if (dy > 80) {
+      document.getElementById('lightbox').className = '';
+      document.getElementById('lightbox-img').src = '';
+    }
+  }, { passive: true });
+})();
+
 // ===== 启动 =====
 init();

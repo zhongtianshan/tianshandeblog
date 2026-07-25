@@ -1080,14 +1080,52 @@ footer span {
   background: var(--cyan);
 }
 
+/* ===== 触摸反馈（手机端） ===== */
+body {
+  -webkit-tap-highlight-color: rgba(0, 240, 255, 0.15);
+}
+
+/* 点击反馈 */
+.post-card:active:not(:hover) {
+  transform: scale(0.98);
+  border-color: var(--cyan);
+}
+
+.tab:active:not(:hover),
+.tag-filter-item:active:not(:hover),
+.back-btn:active:not(:hover),
+.music-btn:active:not(:hover),
+.ap-btn:active:not(:hover) {
+  opacity: 0.7;
+}
+
 /* ===== 响应式 ===== */
 @media (max-width: 600px) {
   #frame-player { object-position: 40% 55%; }
   header h1 { font-size: 1.8em; letter-spacing: 2px; }
   .logo-ring { width: 66px; height: 66px; }
   .post-card { padding: 20px; }
-  .post-content { padding: 20px; }
+  .post-content {
+    padding: 20px;
+    font-size: 1.05em;
+    line-height: 2;
+  }
+  .post-content h1 { font-size: 1.5em; }
+  .post-content h2 { font-size: 1.2em; }
+  .post-content p { margin-bottom: 18px; }
+  .post-content code { font-size: 0.9em; }
   .gallery-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+
+  /* 顶部按钮间距 */
+  #toggle-letters { right: 70px; border-color: var(--cyan); color: var(--cyan); text-shadow: var(--glow-cyan-text); }
+  .music-btn {
+    width: 38px;
+    height: 38px;
+    line-height: 38px;
+    font-size: 1.2em;
+  }
+
+  /* Lightbox */
   .lightbox-frame { padding: 12px; }
   #lightbox-img { max-width: calc(95vw - 36px); max-height: calc(85vh - 36px); }
   .lightbox-frame .corner-tl,
@@ -1095,10 +1133,40 @@ footer span {
   .lightbox-frame .corner-bl,
   .lightbox-frame .corner-br { width: 14px; height: 14px; }
   #lightbox-close { top: -14px; right: -14px; width: 32px; height: 32px; line-height: 32px; font-size: 0.9em; }
+
+  /* 搜索框 */
   #search-input { max-width: 100%; font-size: 0.8em; }
-  .audio-player { padding: 8px 10px; gap: 8px; }
-  .ap-name { max-width: 80px; }
-  .ap-btn { width: 28px; height: 28px; line-height: 28px; }
-  #toggle-bars { right: 70px; border-color: var(--cyan); color: var(--cyan); text-shadow: var(--glow-cyan-text); }
-  #toggle-letters { right: 108px; border-color: var(--cyan); color: var(--cyan); text-shadow: var(--glow-cyan-text); }
+
+  /* 文章内音频播放器 — 手机端优化 */
+  .audio-player {
+    flex-wrap: wrap;
+    padding: 8px 10px;
+    gap: 6px;
+  }
+  .audio-player .ap-btn {
+    width: 32px;
+    height: 32px;
+    line-height: 32px;
+    font-size: 0.85em;
+  }
+  .audio-player .ap-bar {
+    flex: 1 1 100%;
+    height: 14px;
+    order: 1;
+    border-radius: 7px;
+    margin: 6px 0 2px;
+    cursor: url('../cursors/pointer.png') 11 5, pointer;
+  }
+  .audio-player .ap-bar .ap-progress {
+    height: 100%;
+    border-radius: 7px;
+  }
+  .audio-player .ap-name {
+    flex: 1;
+    max-width: none;
+    font-size: 0.75em;
+  }
+  .audio-player .ap-time {
+    font-size: 0.7em;
+  }
 }
