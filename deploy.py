@@ -1,4 +1,4 @@
-import os, subprocess
+import os, subprocess, sys
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
@@ -8,7 +8,12 @@ subprocess.run(['python', 'build.py'], check=True)
 
 # 2. 提交
 print('==> 提交到 Git...')
-subprocess.run(['git', 'add', 'data.js'], check=True)
+subprocess.run(['git', 'add', 'data.js', 'images/'], check=True)
+# 检查是否有变更，有才提交
+r = subprocess.run(['git', 'diff', '--cached', '--quiet'])
+if r.returncode == 0:
+    print('没有新变更，跳过提交')
+    sys.exit(0)
 subprocess.run(['git', 'commit', '-m', '更新索引'], check=True)
 
 # 3. 推送
