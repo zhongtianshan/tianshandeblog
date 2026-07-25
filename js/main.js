@@ -563,6 +563,8 @@ document.addEventListener('keydown', function(e) {
 
   function onPress(e) {
     if (e.type === 'mousedown' && e.button !== 0) return;
+    // 阻止浏览器长按弹出菜单（保存图片等）
+    e.preventDefault();
     holding = false;
     var startTime = Date.now();
 
@@ -609,7 +611,9 @@ document.addEventListener('keydown', function(e) {
   }
 
   ring.addEventListener('mousedown', onPress);
-  ring.addEventListener('touchstart', onPress, { passive: true });
+  ring.addEventListener('touchstart', onPress, { passive: false });
+  // 阻止浏览器默认的长按菜单（保存图片等）
+  ring.addEventListener('contextmenu', function(e) { e.preventDefault(); });
 })();
 
 // ===== 启动 =====
