@@ -1,8 +1,8 @@
 // ===== 天山博客 Service Worker =====
-// 帧动画 ZIP 整包缓存 + CSS/JS/HTML 网络优先
+// 帧动画 ZIP 整包缓存 + CSS/JS/HTML 网络优先 + v6 清理旧缓存
 
-var CACHE_NAME = 'tianshan-v5';
-var FRAME_CACHE = 'tianshan-frames-v5';
+var CACHE_NAME = 'tianshan-v6';
+var FRAME_CACHE = 'tianshan-frames-v6';
 
 // ===== 极简 ZIP 解析器（仅 STORE 模式，不解压 JPEG） =====
 var Zip = {
