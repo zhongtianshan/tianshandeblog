@@ -1329,8 +1329,12 @@ body {
   .post-content code { font-size: 0.9em; }
   .gallery-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
 
-  /* 顶部按钮间距 — 手机端用汉堡菜单替代 */
-  #music-btn, #toggle-bars, #toggle-letters, #toggle-brightness {
+  /* 顶部按钮间距 — 手机端仅保留音乐按钮 + 汉堡菜单 */
+  #music-btn {
+    right: 68px;
+    z-index: 10201;
+  }
+  #toggle-bars, #toggle-letters, #toggle-brightness {
     display: none;
   }
   .brightness-popup { display: none !important; }
