@@ -139,10 +139,21 @@
   <!-- 背景音乐 -->
   <script>
     var musicPlaying = false;
+    var musicLoaded = false;
     var musicBtn = document.getElementById('music-btn');
     var music = new Audio(atob('YXVkaW8vbS5tcDM='));
     music.loop = true;
     music.volume = 0.4;
+    music.preload = 'auto';
+    // 页面加载后立即开始下载，不等 autoplay
+    music.load();
+    musicBtn.classList.add('loading');
+
+    // 加载完成后标记
+    music.addEventListener('canplaythrough', function() {
+      musicLoaded = true;
+      musicBtn.classList.remove('loading');
+    });
 
     function toggleMusic() {
       if (musicPlaying) {

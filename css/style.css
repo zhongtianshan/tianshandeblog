@@ -313,6 +313,16 @@ header .scanline-header {
   box-shadow: none;
 }
 
+/* 加载中脉冲 */
+.music-btn.loading {
+  animation: musicLoad 1.2s ease-in-out infinite;
+}
+
+@keyframes musicLoad {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.7; }
+}
+
 #toggle-bars {
   right: 73px;
   border-color: var(--cyan);
