@@ -160,6 +160,7 @@
         _fallbackAudio.currentTime = offset || 0;
         _fallbackAudio.play().catch(function(){});
         musicPlaying = true;
+        _syncMusicUI();
         return;
       }
 
@@ -172,20 +173,15 @@
         g.gain.value = musicVolume;
         _source.connect(g);
         g.connect(_ctx.destination);
-        _source.start(0, offset || 0);
+        var dur = _decoded.duration || 1;
+        _source.start(0, (offset || 0) % dur);
         _startTime = (_ctx.currentTime || 0) - (offset || 0);
         musicPlaying = true;
-        // 播放成功时更新按钮
-        musicBtn.textContent = '♫';
-        musicBtn.classList.add('on');
-        var mi = document.querySelectorAll('.hm-item');
-        if (mi[0]) mi[0].classList.add('hm-on');
+        _syncMusicUI();
       }
 
       if (_ctx.state === 'suspended') {
-        _ctx.resume().then(doPlay).catch(function() {
-          // resume 失败 —— 不设 musicPlaying，等重试或首次交互
-        });
+        _ctx.resume().then(doPlay).catch(function() {});
       } else {
         doPlay();
       }
@@ -196,7 +192,17 @@
       musicPlaying = false;
     }
 
-    // ===== 暴力自动播放方案 =====
+    function _syncMusicUI() {
+      musicBtn.textContent = musicPlaying ? '♫' : '♪';
+      musicBtn.classList.toggle('on', musicPlaying);
+      var mi = document.querySelectorAll('.hm-item');
+      if (mi[0]) {
+        mi[0].classList.toggle('hm-on', musicPlaying);
+        mi[0].textContent = (musicPlaying ? '♫' : '♪') + ' 背景音乐';
+      }
+    }
+
+    // ===== 自动播放方案 =====
 
     // 1. 立刻尝试
     _playWasm(0);
@@ -213,31 +219,16 @@
       }, 500);
     })();
 
-    // 3. 600ms后设置按钮初始状态（默认显示"播放中"外观）
-    setTimeout(function() {
-      if (!musicPlaying) {
-        musicBtn.textContent = '♫';
-        musicBtn.classList.add('on');
-        var mi = document.querySelectorAll('.hm-item');
-        if (mi[0]) mi[0].classList.add('hm-on');
-      }
-    }, 600);
-
     function toggleMusic() {
       if (musicPlaying) {
-        _pauseTime = _ctx && _decoded ? (_ctx.currentTime || 0) - _startTime : _fallbackAudio.currentTime;
+        _pauseTime = _ctx && _decoded ? ((_ctx.currentTime || 0) - _startTime) % _decoded.duration : _fallbackAudio.currentTime;
         _stopWasm();
         _fallbackAudio.pause();
-        musicBtn.textContent = '♪';
-        musicBtn.classList.remove('on');
-        _retryCount = 999; // 用户手动暂停，停止自动重试
+        _retryCount = 999;
+        _syncMusicUI();
       } else {
         _playWasm(_pauseTime);
-        musicBtn.textContent = '♫';
-        musicBtn.classList.add('on');
       }
-      var mi = document.querySelectorAll('.hm-item');
-      if (mi[0]) mi[0].classList.toggle('hm-on', musicPlaying);
     }
 
     // 首次交互 fallback：用户任意触摸/点击即播放
@@ -249,10 +240,10 @@
     document.addEventListener('click', _firstTap);
     document.addEventListener('touchstart', _firstTap);
 
-    // 初始化汉堡菜单状态
+    // 初始化汉堡菜单状态（边框和字母默认开）
+    _syncMusicUI();
     (function() {
       var mi = document.querySelectorAll('.hm-item');
-      if (mi[0] && !musicPlaying) mi[0].classList.add('hm-on');
       if (mi[1]) mi[1].classList.add('hm-on');
       if (mi[2]) mi[2].classList.add('hm-on');
     })();
