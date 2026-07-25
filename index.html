@@ -144,6 +144,7 @@
     var _source = null;
     var _startTime = 0;
     var _pauseTime = 0;
+    var _retryCount = 0;
     try { _ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
     if (_ctx) {
       fetch('audio/m.mp3').then(function(r) { return r.arrayBuffer(); }).then(function(buf) {
@@ -159,7 +160,6 @@
 
     function _playWasm(offset) {
       if (!_ctx || !_decoded) {
-        // 降级到 Audio 元素
         _fallbackAudio.currentTime = offset || 0;
         _fallbackAudio.play().catch(function(){});
         musicPlaying = true;
@@ -178,14 +178,16 @@
         _source.start(0, offset || 0);
         _startTime = (_ctx.currentTime || 0) - (offset || 0);
         musicPlaying = true;
+        // 播放成功时更新按钮
+        musicBtn.textContent = '♫';
+        musicBtn.classList.add('on');
+        var mi = document.querySelectorAll('.hm-item');
+        if (mi[0]) mi[0].classList.add('hm-on');
       }
 
       if (_ctx.state === 'suspended') {
         _ctx.resume().then(doPlay).catch(function() {
-          // resume 失败时降级到 Audio 元素
-          _fallbackAudio.currentTime = offset || 0;
-          _fallbackAudio.play().catch(function(){});
-          musicPlaying = true;
+          // resume 失败 —— 不设 musicPlaying，等重试或首次交互
         });
       } else {
         doPlay();
@@ -197,22 +199,42 @@
       musicPlaying = false;
     }
 
-    // 立刻尝试自动播放
+    // ===== 暴力自动播放方案 =====
+
+    // 1. 立刻尝试
     _playWasm(0);
 
-    // 自动播放被拦截时，等500ms确认状态
+    // 2. 暴力重试：每500ms试一次，最多20次（10秒）
+    (function _retryPlay() {
+      if (musicPlaying || _retryCount >= 20) return;
+      _retryCount++;
+      setTimeout(function() {
+        if (!musicPlaying) {
+          _playWasm(0);
+          _retryPlay();
+        }
+      }, 500);
+    })();
+
+    // 3. 600ms后设置按钮初始状态（默认显示"播放中"外观）
     setTimeout(function() {
       if (!musicPlaying) {
-        _stopWasm();
-        musicBtn.textContent = '♪';
-        musicBtn.classList.remove('on');
-      } else {
         musicBtn.textContent = '♫';
         musicBtn.classList.add('on');
         var mi = document.querySelectorAll('.hm-item');
         if (mi[0]) mi[0].classList.add('hm-on');
       }
     }, 600);
+
+    // 4. 1.2秒后模拟点击按钮两次（你说的笨方法）
+    setTimeout(function() {
+      if (!musicPlaying) {
+        musicBtn.click();
+        setTimeout(function() {
+          if (!musicPlaying) musicBtn.click();
+        }, 150);
+      }
+    }, 1200);
 
     function toggleMusic() {
       if (musicPlaying) {
@@ -221,6 +243,7 @@
         _fallbackAudio.pause();
         musicBtn.textContent = '♪';
         musicBtn.classList.remove('on');
+        _retryCount = 999; // 用户手动暂停，停止自动重试
       } else {
         _playWasm(_pauseTime);
         musicBtn.textContent = '♫';
@@ -232,24 +255,12 @@
 
     // 首次交互 fallback：用户任意触摸/点击即播放
     document.addEventListener('click', function _once() {
-      if (!musicPlaying) {
-        _playWasm(_pauseTime);
-        musicBtn.textContent = '♫';
-        musicBtn.classList.add('on');
-        var mi = document.querySelectorAll('.hm-item');
-        if (mi[0]) mi[0].classList.add('hm-on');
-      }
+      if (!musicPlaying) { _playWasm(_pauseTime); }
       document.removeEventListener('click', _once);
       document.removeEventListener('touchstart', _once);
     });
     document.addEventListener('touchstart', function _once() {
-      if (!musicPlaying) {
-        _playWasm(_pauseTime);
-        musicBtn.textContent = '♫';
-        musicBtn.classList.add('on');
-        var mi = document.querySelectorAll('.hm-item');
-        if (mi[0]) mi[0].classList.add('hm-on');
-      }
+      if (!musicPlaying) { _playWasm(_pauseTime); }
       document.removeEventListener('click', _once);
       document.removeEventListener('touchstart', _once);
     });
