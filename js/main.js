@@ -553,34 +553,63 @@ document.addEventListener('keydown', function(e) {
   });
 })();
 
-// ===== Logo 彩蛋：头像连击 =====
+// ===== Logo 彩蛋：点击连击 + 长按缩放手感 =====
 (function() {
-  if (!navigator.vibrate) return;
   var ring = document.querySelector('.logo-ring');
   if (!ring) return;
   var lastTap = 0;
+  var longTimer = null;
+  var holding = false;
 
-  ring.addEventListener('click', function(e) {
-    var now = Date.now();
-    var interval = now - lastTap;
-    lastTap = now;
+  function onPress(e) {
+    if (e.type === 'mousedown' && e.button !== 0) return;
+    holding = false;
+    var startTime = Date.now();
 
-    // 点得越快震得越狠
-    var vib = 12;
-    if (interval < 120) {
-      vib = Math.min(130, Math.round(80 * (120 - interval) / 120 + 50));
-    } else if (interval < 300) {
-      vib = 35;
-    } else if (interval < 600) {
-      vib = 18;
+    longTimer = setTimeout(function() {
+      holding = true;
+      ring.classList.add('pressed');
+      if (navigator.vibrate) navigator.vibrate(5000);
+    }, 250);
+
+    function onRelease() {
+      clearTimeout(longTimer);
+      if (holding) {
+        // 长按松手：放大回去 + 停震动
+        ring.classList.remove('pressed');
+        if (navigator.vibrate) navigator.vibrate(0);
+      } else {
+        // 短点：连击判定 + 按节奏震动 + 弹动动画
+        var now = Date.now();
+        var gap = now - lastTap;
+        lastTap = now;
+
+        var vib = 12;
+        if (gap < 120) {
+          vib = Math.min(130, Math.round(80 * (120 - gap) / 120 + 50));
+        } else if (gap < 300) {
+          vib = 35;
+        } else if (gap < 600) {
+          vib = 18;
+        }
+        if (navigator.vibrate) navigator.vibrate(vib);
+
+        ring.classList.remove('tapped');
+        void ring.offsetWidth;
+        ring.classList.add('tapped');
+      }
+      document.removeEventListener('mouseup', onRelease);
+      document.removeEventListener('touchend', onRelease);
+      document.removeEventListener('touchcancel', onRelease);
     }
-    navigator.vibrate(vib);
 
-    // 整个 logo-ring 缩放（图片 + 外圈一起）
-    ring.classList.remove('tapped');
-    void ring.offsetWidth;
-    ring.classList.add('tapped');
-  });
+    document.addEventListener('mouseup', onRelease, { once: true });
+    document.addEventListener('touchend', onRelease, { once: true });
+    document.addEventListener('touchcancel', onRelease, { once: true });
+  }
+
+  ring.addEventListener('mousedown', onPress);
+  ring.addEventListener('touchstart', onPress, { passive: true });
 })();
 
 // ===== 启动 =====
