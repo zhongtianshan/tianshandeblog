@@ -534,5 +534,24 @@ document.addEventListener('keydown', function(e) {
   }, { passive: true });
 })();
 
+// ===== 手机端轻震动反馈 =====
+(function() {
+  // 只在触屏设备上启用（手机/平板）
+  if (!navigator.vibrate || window.matchMedia('(pointer: fine)').matches) return;
+
+  var targets = '.post-card, .tab, .tag-filter-item, .back-btn, .ap-btn, .hm-item, .hamburger, .gallery-item, #lightbox-close';
+  document.addEventListener('click', function(e) {
+    var el = e.target;
+    while (el) {
+      if (el.matches && el.matches(targets)) {
+        navigator.vibrate(12);
+        return;
+      }
+      el = el.parentElement;
+      if (el === document.body || !el) return;
+    }
+  });
+})();
+
 // ===== 启动 =====
 init();
