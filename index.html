@@ -554,11 +554,10 @@
         overlay.style.background = 'rgba(0,0,0,' + (cur/100) + ')';
         sliders.forEach(function(o) {
           o.f.style.width = cur + '%';
+          o.f.style.transition = snap ? '' : 'none';
           if (o.t) {
             o.t.style.left = cur + '%';
-            o.t.classList.toggle('snapping', !!snap);
-            if (!snap) o.t.classList.add('no-transition');
-            else o.t.classList.remove('no-transition');
+            o.t.style.transition = snap ? '' : 'none';
           }
         });
       }
