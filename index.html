@@ -103,40 +103,7 @@
     <small>Powered by Markdown + Cyberpunk</small>
   </footer>
 
-  <!-- 帧动画背景（855 张图片 24fps，纯定时驱动，非视频 IDM 无法识别） -->
-  <script>
-    (function(){
-      var total = 855, cur = 1, fps = 24, running = true;
-      var bg = document.getElementById('video-bg');
-      var img = document.createElement('img');
-      img.id = 'frame-player';
-      bg.appendChild(img);
-      var ov = document.createElement('div');
-      ov.id = 'video-overlay';
-      bg.appendChild(ov);
-
-      function pad(x) {
-        return (x < 10 ? '000' : x < 100 ? '00' : x < 1000 ? '0' : '') + x;
-      }
-
-      // 预加载
-      for (var k = 1; k <= total; k++) {
-        var c = new Image();
-        c.src = 'frames/f_' + pad(k) + '.jpg';
-      }
-
-      img.src = 'frames/f_' + pad(1) + '.jpg';
-
-      setInterval(function() {
-        if (!running) return;
-        cur++;
-        if (cur > total) cur = 1;
-        img.src = 'frames/f_' + pad(cur) + '.jpg';
-      }, 1000 / fps);
-    })();
-  </script>
-
-  <!-- 背景音乐 -->
+  <!-- 背景音乐（最先下载：用户最感知到的） -->
   <script>
     var musicPlaying = false;
     var musicLoaded = false;
@@ -145,11 +112,9 @@
     music.loop = true;
     music.volume = 0.4;
     music.preload = 'auto';
-    // 页面加载后立即开始下载，不等 autoplay
     music.load();
     musicBtn.classList.add('loading');
 
-    // 加载完成后标记
     music.addEventListener('canplaythrough', function() {
       musicLoaded = true;
       musicBtn.classList.remove('loading');
@@ -167,28 +132,23 @@
         musicBtn.classList.add('on');
         musicPlaying = true;
       }
-      // 同步汉堡菜单状态
       var mi = document.querySelectorAll('.hm-item');
       if (mi[0]) mi[0].classList.toggle('hm-on', musicPlaying);
     }
 
-    // 尝试自动播放
     music.play().then(function() {
       musicBtn.textContent = '♫';
       musicBtn.classList.add('on');
       musicPlaying = true;
-      // 同步汉堡菜单
       var mi = document.querySelectorAll('.hm-item');
       if (mi[0]) mi[0].classList.add('hm-on');
     }).catch(function() {
-      // 浏览器阻止自动播放，首次点击页面任意位置时启动
       var startOnce = function() {
         if (!musicPlaying) {
           music.play().catch(function(){});
           musicBtn.textContent = '♫';
           musicBtn.classList.add('on');
           musicPlaying = true;
-          // 同步汉堡菜单
           var mi = document.querySelectorAll('.hm-item');
           if (mi[0]) mi[0].classList.add('hm-on');
         }
@@ -199,11 +159,44 @@
       document.addEventListener('touchstart', startOnce);
     });
 
-    // 初始化汉堡菜单状态（边框和字母默认开启）
     (function() {
       var mi = document.querySelectorAll('.hm-item');
       if (mi[1]) mi[1].classList.add('hm-on');
       if (mi[2]) mi[2].classList.add('hm-on');
+    })();
+  </script>
+
+  <!-- 帧动画背景（延后加载：把带宽优先让给音频） -->
+  <script>
+    (function(){
+      var total = 855, cur = 1, fps = 24, running = true;
+      var bg = document.getElementById('video-bg');
+      var img = document.createElement('img');
+      img.id = 'frame-player';
+      bg.appendChild(img);
+      var ov = document.createElement('div');
+      ov.id = 'video-overlay';
+      bg.appendChild(ov);
+
+      function pad(x) {
+        return (x < 10 ? '000' : x < 100 ? '00' : x < 1000 ? '0' : '') + x;
+      }
+
+      // 延迟开始预加载（让音频先走）
+      setTimeout(function() {
+        for (var k = 1; k <= total; k++) {
+          var c = new Image();
+          c.src = 'frames/f_' + pad(k) + '.jpg';
+        }
+        img.src = 'frames/f_' + pad(1) + '.jpg';
+      }, 2000);
+
+      setInterval(function() {
+        if (!running) return;
+        cur++;
+        if (cur > total) cur = 1;
+        img.src = 'frames/f_' + pad(cur) + '.jpg';
+      }, 1000 / fps);
     })();
   </script>
 

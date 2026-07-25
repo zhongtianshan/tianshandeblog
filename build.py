@@ -1,5 +1,6 @@
 import os, sys, json, re
 from datetime import datetime
+import zipfile
 sys.stdout.reconfigure(encoding='utf-8')
 
 posts_dir = 'posts'
@@ -80,3 +81,15 @@ with open(output_file, 'w', encoding='utf-8') as f:
 
 print(f'扫描完成: {len(posts)} 篇文章, {len(images)} 张图片')
 print(f'已生成 {output_file}')
+
+# 打包帧动画（仅 .jpg，STORE 模式无需解压）
+frames_dir = 'frames'
+zip_path = os.path.join(frames_dir, 'frames.zip')
+if os.path.exists(frames_dir):
+    count = 0
+    with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_STORED) as zf:
+        for f in sorted(os.listdir(frames_dir)):
+            if f.lower().endswith('.jpg'):
+                zf.write(os.path.join(frames_dir, f), arcname=f)
+                count += 1
+    print(f'已打包 {count} 帧 → {zip_path}')
