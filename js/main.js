@@ -21,8 +21,10 @@ function createAudioPlayer(filename) {
   _inlineAudios.push(audio);
 
   function resumeBg() {
-    if (_bgSavedState.wasPlaying && typeof music !== 'undefined') {
-      music.play().catch(function(){});
+    if (_bgSavedState.wasPlaying) {
+      if (typeof _playWasm === 'function') {
+        _playWasm(_bgSavedState.currentTime || 0);
+      }
       if (musicBtn) { musicBtn.textContent = '♫'; musicBtn.classList.add('on'); }
       musicPlaying = true;
       _bgSavedState.wasPlaying = false;
@@ -38,10 +40,12 @@ function createAudioPlayer(filename) {
       // 先更新按钮状态，再处理背景音乐（避免 musicBtn 问题卡住）
       btn.textContent = '⏸';
       // 暂停背景音乐
-      if (typeof music !== 'undefined' && musicPlaying) {
+      if (typeof _stopWasm === 'function' && musicPlaying) {
         _bgSavedState.wasPlaying = true;
-        _bgSavedState.currentTime = music.currentTime;
-        music.pause();
+        _bgSavedState.currentTime = _ctx ? (_ctx.currentTime || 0) - _startTime : _fallbackAudio.currentTime;
+        _pauseTime = _bgSavedState.currentTime;
+        _stopWasm();
+        if (typeof _fallbackAudio !== 'undefined') _fallbackAudio.pause();
         if (musicBtn) { musicBtn.textContent = '♪'; musicBtn.classList.remove('on'); }
       }
       var promise = audio.play();
@@ -215,11 +219,11 @@ function showPost(index) {
 
 // ===== 返回列表 =====
 function resumeBgMusic() {
-  if (_bgSavedState.wasPlaying && typeof music !== 'undefined' && music.paused) {
-    music.currentTime = _bgSavedState.currentTime || 0;
-    music.play().catch(function(){});
-    musicBtn.textContent = '♫';
-    musicBtn.classList.add('on');
+  if (_bgSavedState.wasPlaying && !musicPlaying) {
+    if (typeof _playWasm === 'function') {
+      _playWasm(_bgSavedState.currentTime || 0);
+    }
+    if (musicBtn) { musicBtn.textContent = '♫'; musicBtn.classList.add('on'); }
     musicPlaying = true;
     _bgSavedState.wasPlaying = false;
   }

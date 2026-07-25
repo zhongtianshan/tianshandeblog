@@ -103,60 +103,120 @@
     <small>Powered by Markdown + Cyberpunk</small>
   </footer>
 
-  <!-- 背景音乐（最先下载：用户最感知到的） -->
+  <!-- 背景音乐：Web Audio API 预解码 + 零延迟启动 -->
   <script>
     var musicPlaying = false;
     var musicLoaded = false;
     var musicBtn = document.getElementById('music-btn');
-    var music = new Audio(atob('YXVkaW8vbS5tcDM='));
-    music.loop = true;
-    music.volume = 0.4;
-    music.preload = 'auto';
-    music.load();
+    var musicVolume = 0.4;
+    // 降级用 Audio 元素
+    var _fallbackAudio = new Audio('audio/m.mp3');
+    _fallbackAudio.loop = true;
+    _fallbackAudio.volume = musicVolume;
+    _fallbackAudio.preload = 'auto';
+    _fallbackAudio.load();
+
+    // Web Audio API 预解码（无需用户交互，后台完成）
+    var _ctx = null;
+    var _decoded = null;
+    var _source = null;
+    var _startTime = 0;
+    var _pauseTime = 0;
+    try { _ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
+    if (_ctx) {
+      fetch('audio/m.mp3').then(function(r) { return r.arrayBuffer(); }).then(function(buf) {
+        _ctx.decodeAudioData(buf, function(buffer) {
+          _decoded = buffer;
+          musicLoaded = true;
+          if (musicBtn) musicBtn.classList.remove('loading');
+        });
+      }).catch(function(){});
+    }
+
     musicBtn.classList.add('loading');
 
-    music.addEventListener('canplaythrough', function() {
-      musicLoaded = true;
-      musicBtn.classList.remove('loading');
-    });
+    function _playWasm(offset) {
+      if (!_ctx || !_decoded) {
+        // 降级到 Audio 元素
+        _fallbackAudio.currentTime = offset || 0;
+        _fallbackAudio.play().catch(function(){});
+        musicPlaying = true;
+        return;
+      }
+      if (_source) { try { _source.stop(); } catch(e) {} _source = null; }
+      if (_ctx.state === 'suspended') _ctx.resume().catch(function(){});
+      _source = _ctx.createBufferSource();
+      _source.buffer = _decoded;
+      _source.loop = true;
+      var g = _ctx.createGain();
+      g.gain.value = musicVolume;
+      _source.connect(g);
+      g.connect(_ctx.destination);
+      _source.start(0, offset || 0);
+      _startTime = (_ctx.currentTime || 0) - (offset || 0);
+      musicPlaying = true;
+    }
+
+    function _stopWasm() {
+      if (_source) { try { _source.stop(); } catch(e) {} _source = null; }
+      musicPlaying = false;
+    }
+
+    // 立刻尝试自动播放
+    _playWasm(0);
+
+    // 自动播放被拦截时，等500ms确认状态
+    setTimeout(function() {
+      if (!musicPlaying) {
+        _stopWasm();
+        musicBtn.textContent = '♪';
+        musicBtn.classList.remove('on');
+      } else {
+        musicBtn.textContent = '♫';
+        musicBtn.classList.add('on');
+        var mi = document.querySelectorAll('.hm-item');
+        if (mi[0]) mi[0].classList.add('hm-on');
+      }
+    }, 600);
 
     function toggleMusic() {
       if (musicPlaying) {
-        music.pause();
+        _pauseTime = _ctx && _decoded ? (_ctx.currentTime || 0) - _startTime : _fallbackAudio.currentTime;
+        _stopWasm();
+        _fallbackAudio.pause();
         musicBtn.textContent = '♪';
         musicBtn.classList.remove('on');
-        musicPlaying = false;
       } else {
-        music.play().catch(function(){});
+        _playWasm(_pauseTime);
         musicBtn.textContent = '♫';
         musicBtn.classList.add('on');
-        musicPlaying = true;
       }
       var mi = document.querySelectorAll('.hm-item');
       if (mi[0]) mi[0].classList.toggle('hm-on', musicPlaying);
     }
 
-    music.play().then(function() {
-      musicBtn.textContent = '♫';
-      musicBtn.classList.add('on');
-      musicPlaying = true;
-      var mi = document.querySelectorAll('.hm-item');
-      if (mi[0]) mi[0].classList.add('hm-on');
-    }).catch(function() {
-      var startOnce = function() {
-        if (!musicPlaying) {
-          music.play().catch(function(){});
-          musicBtn.textContent = '♫';
-          musicBtn.classList.add('on');
-          musicPlaying = true;
-          var mi = document.querySelectorAll('.hm-item');
-          if (mi[0]) mi[0].classList.add('hm-on');
-        }
-        document.removeEventListener('click', startOnce);
-        document.removeEventListener('touchstart', startOnce);
-      };
-      document.addEventListener('click', startOnce);
-      document.addEventListener('touchstart', startOnce);
+    // 首次交互 fallback：用户任意触摸/点击即播放
+    document.addEventListener('click', function _once() {
+      if (!musicPlaying) {
+        _playWasm(_pauseTime);
+        musicBtn.textContent = '♫';
+        musicBtn.classList.add('on');
+        var mi = document.querySelectorAll('.hm-item');
+        if (mi[0]) mi[0].classList.add('hm-on');
+      }
+      document.removeEventListener('click', _once);
+      document.removeEventListener('touchstart', _once);
+    });
+    document.addEventListener('touchstart', function _once() {
+      if (!musicPlaying) {
+        _playWasm(_pauseTime);
+        musicBtn.textContent = '♫';
+        musicBtn.classList.add('on');
+        var mi = document.querySelectorAll('.hm-item');
+        if (mi[0]) mi[0].classList.add('hm-on');
+      }
+      document.removeEventListener('click', _once);
+      document.removeEventListener('touchstart', _once);
     });
 
     (function() {
