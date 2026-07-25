@@ -21,14 +21,7 @@ function createAudioPlayer(filename) {
   _inlineAudios.push(audio);
 
   function resumeBg() {
-    if (_bgSavedState.wasPlaying) {
-      if (typeof _playWasm === 'function') {
-        _playWasm(_bgSavedState.currentTime || 0);
-      }
-      if (musicBtn) { musicBtn.textContent = '♫'; musicBtn.classList.add('on'); }
-      musicPlaying = true;
-      _bgSavedState.wasPlaying = false;
-    }
+    resumeBgMusic();
   }
 
   var btn = document.createElement('span');

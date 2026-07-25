@@ -128,7 +128,6 @@
   <!-- 背景音乐：Web Audio API 预解码 + 零延迟启动 -->
   <script>
     var musicPlaying = false;
-    var musicLoaded = false;
     var musicBtn = document.getElementById('music-btn');
     var musicVolume = 0.4;
     // 降级用 Audio 元素
@@ -145,18 +144,16 @@
     var _startTime = 0;
     var _pauseTime = 0;
     var _retryCount = 0;
+    musicBtn.classList.add('loading');
     try { _ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
     if (_ctx) {
       fetch('audio/m.mp3').then(function(r) { return r.arrayBuffer(); }).then(function(buf) {
         _ctx.decodeAudioData(buf, function(buffer) {
           _decoded = buffer;
-          musicLoaded = true;
           if (musicBtn) musicBtn.classList.remove('loading');
         });
       }).catch(function(){});
     }
-
-    musicBtn.classList.add('loading');
 
     function _playWasm(offset) {
       if (!_ctx || !_decoded) {
@@ -226,16 +223,6 @@
       }
     }, 600);
 
-    // 4. 1.2秒后模拟点击按钮两次（你说的笨方法）
-    setTimeout(function() {
-      if (!musicPlaying) {
-        musicBtn.click();
-        setTimeout(function() {
-          if (!musicPlaying) musicBtn.click();
-        }, 150);
-      }
-    }, 1200);
-
     function toggleMusic() {
       if (musicPlaying) {
         _pauseTime = _ctx && _decoded ? (_ctx.currentTime || 0) - _startTime : _fallbackAudio.currentTime;
@@ -254,19 +241,18 @@
     }
 
     // 首次交互 fallback：用户任意触摸/点击即播放
-    document.addEventListener('click', function _once() {
+    function _firstTap() {
       if (!musicPlaying) { _playWasm(_pauseTime); }
-      document.removeEventListener('click', _once);
-      document.removeEventListener('touchstart', _once);
-    });
-    document.addEventListener('touchstart', function _once() {
-      if (!musicPlaying) { _playWasm(_pauseTime); }
-      document.removeEventListener('click', _once);
-      document.removeEventListener('touchstart', _once);
-    });
+      document.removeEventListener('click', _firstTap);
+      document.removeEventListener('touchstart', _firstTap);
+    }
+    document.addEventListener('click', _firstTap);
+    document.addEventListener('touchstart', _firstTap);
 
+    // 初始化汉堡菜单状态
     (function() {
       var mi = document.querySelectorAll('.hm-item');
+      if (mi[0] && !musicPlaying) mi[0].classList.add('hm-on');
       if (mi[1]) mi[1].classList.add('hm-on');
       if (mi[2]) mi[2].classList.add('hm-on');
     })();

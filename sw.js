@@ -1,8 +1,11 @@
 // ===== 天山博客 Service Worker =====
-// 帧动画 ZIP 整包缓存 + CSS/JS/HTML 网络优先 + v6 清理旧缓存
+// v7 — 缓存优先策略：首次完整加载后，后续访问几乎零流量
+// CSS/JS/图片缓存优先（URL 版本号变则自动换缓存）
+// data.js 缓存优先 + 后台静默更新
+// HTML 网络优先（保证内容最新）
 
-var CACHE_NAME = 'tianshan-v6';
-var FRAME_CACHE = 'tianshan-frames-v6';
+var CACHE_NAME = 'tianshan-v7';
+var FRAME_CACHE = 'tianshan-frames-v7';
 
 // ===== 极简 ZIP 解析器（仅 STORE 模式，不解压 JPEG） =====
 var Zip = {
@@ -94,52 +97,38 @@ self.addEventListener('activate', function(e) {
   );
 });
 
-// ===== 请求拦截 =====
-self.addEventListener('fetch', function(e) {
-  var url = e.request.url;
+// ===== 缓存策略函数 =====
 
-  // 帧动画：缓存优先（ZIP 提取的）
-  if (url.indexOf('/frames/') !== -1) {
-    e.respondWith(
-      caches.match(e.request).then(function(cached) {
-        if (cached) return cached;
-        return fetch(e.request).then(function(res) {
-          if (!res || res.status !== 200) return res;
-          var clone = res.clone();
-          caches.open(FRAME_CACHE).then(function(c) { c.put(e.request, clone); });
-          return res;
-        });
-      })
-    );
-    return;
-  }
+// 缓存优先：有缓存直接返回，无缓存走网络并缓存
+function cacheFirst(request) {
+  return caches.match(request).then(function(cached) {
+    if (cached) return cached;
+    return fetch(request).then(function(res) {
+      if (!res || res.status !== 200) return res;
+      var clone = res.clone();
+      caches.open(CACHE_NAME).then(function(c) { c.put(request, clone); });
+      return res;
+    });
+  });
+}
 
-  // 背景音乐：缓存优先（永不变更）
-  if (url.indexOf('/audio/') !== -1) {
-    e.respondWith(
-      caches.match(e.request).then(function(cached) {
-        if (cached) return cached;
-        return fetch(e.request).then(function(res) {
-          if (!res || res.status !== 200) return res;
-          var clone = res.clone();
-          caches.open(CACHE_NAME).then(function(c) { c.put(e.request, clone); });
-          return res;
-        });
-      })
-    );
-    return;
-  }
+// 缓存优先 + 后台更新：立即返回缓存，网络返回后更新缓存
+function staleWhileRevalidate(request) {
+  var fetchPromise = fetch(request).then(function(res) {
+    if (res && res.status === 200) {
+      var clone = res.clone();
+      caches.open(CACHE_NAME).then(function(c) { c.put(request, clone); });
+    }
+    return res;
+  }).catch(function() { return null; });
 
-  // data.js：网络优先（文章数据经常更新）
-  if (/\bdata\.js\b/.test(url)) {
-    e.respondWith(networkFirst(e.request));
-    return;
-  }
+  return caches.match(request).then(function(cached) {
+    // 有缓存立即返回，无缓存等网络
+    return cached || fetchPromise;
+  });
+}
 
-  // 其他：网络优先
-  e.respondWith(networkFirst(e.request));
-});
-
+// 网络优先：先走网络，失败时用缓存
 function networkFirst(request) {
   return fetch(request).then(function(res) {
     if (res && res.status === 200) {
@@ -151,3 +140,48 @@ function networkFirst(request) {
     return caches.match(request);
   });
 }
+
+// ===== 请求拦截 =====
+self.addEventListener('fetch', function(e) {
+  var url = e.request.url;
+
+  // 帧动画：缓存优先（ZIP 提取的）
+  if (url.indexOf('/frames/') !== -1) {
+    e.respondWith(cacheFirst(e.request));
+    return;
+  }
+
+  // 背景音乐：缓存优先（永不变更）
+  if (url.indexOf('/audio/') !== -1) {
+    e.respondWith(cacheFirst(e.request));
+    return;
+  }
+
+  // 字体/图标/光标：缓存优先（永不变更）
+  if (/\/fonts\/|\/ICO\/|\/cursors\//.test(url)) {
+    e.respondWith(cacheFirst(e.request));
+    return;
+  }
+
+  // CSS/JS/图片（含版本号 ?v=xxx）：缓存优先
+  // URL 带版本号，新部署时版本号变 → 自动请求新文件
+  if (/\.(css|js|png|jpg|jpeg|svg|webp)(\?|$)/.test(url)) {
+    e.respondWith(cacheFirst(e.request));
+    return;
+  }
+
+  // data.js：立即从缓存渲染，后台静默更新
+  if (/\bdata\.js\b/.test(url)) {
+    e.respondWith(staleWhileRevalidate(e.request));
+    return;
+  }
+
+  // HTML 导航：网络优先，保证内容最新
+  if (e.request.mode === 'navigate') {
+    e.respondWith(networkFirst(e.request));
+    return;
+  }
+
+  // 其他：网络优先
+  e.respondWith(networkFirst(e.request));
+});

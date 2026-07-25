@@ -21,6 +21,7 @@
   --text: #c0c0d0;
   --text-dim: #606080;
   --border: #1a1a2e;
+  --font-mono: "Minecraft", "Consolas", "Courier New", monospace;
   --glow-cyan: 0 0 8px rgba(0, 240, 255, 0.5), 0 0 25px rgba(0, 240, 255, 0.25), 0 0 60px rgba(0, 240, 255, 0.1);
   --glow-magenta: 0 0 8px rgba(255, 0, 128, 0.5), 0 0 25px rgba(255, 0, 128, 0.25), 0 0 60px rgba(255, 0, 128, 0.1);
   --glow-cyan-text: 0 0 8px rgba(0, 240, 255, 0.6), 0 0 20px rgba(0, 240, 255, 0.3);
@@ -38,7 +39,7 @@ body {
   position: relative;
   background: #000000;
   color: var(--text);
-  font-family: "Minecraft", "Consolas", "Courier New", monospace;
+  font-family: var(--font-mono);
   line-height: 1.7;
   min-height: 100vh;
   overflow-x: hidden;
@@ -243,7 +244,7 @@ header {
 }
 
 header h1 {
-  font-family: "Minecraft", "Consolas", "Courier New", monospace;
+  font-family: var(--font-mono);
   font-size: 2.8em;
   font-weight: 900;
   text-transform: uppercase;
@@ -565,7 +566,7 @@ header .scanline-header {
   display: inline-block;
   padding: 8px 25px;
   margin: 0 5px;
-  font-family: "Minecraft", "Consolas", "Courier New", monospace;
+  font-family: var(--font-mono);
   font-size: 0.9em;
   color: var(--text-dim);
   border: 1px solid var(--border);
@@ -601,7 +602,7 @@ header .scanline-header {
   background: var(--bg-glass);
   border: 1px solid var(--border);
   color: var(--text);
-  font-family: "Minecraft", "Consolas", "Courier New", monospace;
+  font-family: var(--font-mono);
   font-size: 0.85em;
   outline: none;
   transition: all 0.3s ease;
@@ -665,7 +666,7 @@ header .scanline-header {
 }
 
 .post-card h2 {
-  font-family: "Minecraft", "Consolas", "Courier New", monospace;
+  font-family: var(--font-mono);
   font-size: 1.2em;
   font-weight: 700;
   color: var(--cyan);
@@ -702,7 +703,7 @@ header .scanline-header {
   position: absolute;
   top: 15px;
   right: 20px;
-  font-family: "Minecraft", "Consolas", "Courier New", monospace;
+  font-family: var(--font-mono);
   font-size: 0.7em;
   color: var(--text-dim);
   opacity: 0.3;
@@ -720,7 +721,7 @@ header .scanline-header {
   border: 1px solid var(--cyan);
   color: var(--cyan);
   background: transparent;
-  font-family: "Minecraft", "Consolas", "Courier New", monospace;
+  font-family: var(--font-mono);
   font-size: 0.85em;
   cursor: url('../cursors/pointer.png') 11 5, pointer;
   transition: all 0.3s ease;
@@ -743,7 +744,7 @@ header .scanline-header {
 }
 
 .post-content h1 {
-  font-family: "Minecraft", "Consolas", "Courier New", monospace;
+  font-family: var(--font-mono);
   font-size: 1.8em;
   color: var(--cyan);
   margin-bottom: 20px;
@@ -753,7 +754,7 @@ header .scanline-header {
 }
 
 .post-content h2 {
-  font-family: "Minecraft", "Consolas", "Courier New", monospace;
+  font-family: var(--font-mono);
   font-size: 1.3em;
   color: var(--magenta);
   margin: 30px 0 15px;
@@ -762,7 +763,7 @@ header .scanline-header {
 }
 
 .post-content h3 {
-  font-family: "Minecraft", "Consolas", "Courier New", monospace;
+  font-family: var(--font-mono);
   font-size: 1.1em;
   color: var(--yellow);
   margin: 25px 0 12px;
@@ -788,7 +789,7 @@ header .scanline-header {
   border: 1px solid rgba(0, 240, 255, 0.2);
   padding: 2px 8px;
   border-radius: 3px;
-  font-family: "Minecraft", "Consolas", "Courier New", monospace;
+  font-family: var(--font-mono);
   font-size: 0.85em;
   color: var(--green);
 }
@@ -861,7 +862,7 @@ header .scanline-header {
 .post-content th {
   background: rgba(0, 240, 255, 0.1);
   color: var(--cyan);
-  font-family: "Minecraft", "Consolas", "Courier New", monospace;
+  font-family: var(--font-mono);
   font-size: 0.8em;
   letter-spacing: 1px;
 }
@@ -938,7 +939,7 @@ header .scanline-header {
   color: var(--text-dim);
   min-width: 40px;
   text-align: right;
-  font-family: "Minecraft", "Consolas", "Courier New", monospace;
+  font-family: var(--font-mono);
 }
 
 /* ===== 标签筛选 ===== */
@@ -1018,7 +1019,7 @@ header .scanline-header {
 }
 
 .tag-picker-box h3 {
-  font-family: "Minecraft", "Consolas", "Courier New", monospace;
+  font-family: var(--font-mono);
   color: var(--cyan);
   font-size: 1em;
   letter-spacing: 2px;
@@ -1067,7 +1068,7 @@ header .scanline-header {
   border: 1px solid var(--cyan);
   color: var(--cyan);
   background: transparent;
-  font-family: "Minecraft", "Consolas", "Courier New", monospace;
+  font-family: var(--font-mono);
   font-size: 0.9em;
   cursor: url('../cursors/pointer.png') 11 5, pointer;
   transition: all 0.3s ease;
@@ -1086,7 +1087,7 @@ header .scanline-header {
 }
 
 .gallery h2 {
-  font-family: "Minecraft", "Consolas", "Courier New", monospace;
+  font-family: var(--font-mono);
   font-size: 1.2em;
   color: var(--magenta);
   margin-bottom: 20px;
@@ -1227,7 +1228,7 @@ header .scanline-header {
   cursor: pointer;
   transition: all 0.3s ease;
   z-index: 10001;
-  font-family: "Minecraft", "Consolas", "Courier New", monospace;
+  font-family: var(--font-mono);
   background: rgba(0, 0, 0, 0.8);
 }
 
