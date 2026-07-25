@@ -165,18 +165,31 @@
         musicPlaying = true;
         return;
       }
-      if (_source) { try { _source.stop(); } catch(e) {} _source = null; }
-      if (_ctx.state === 'suspended') _ctx.resume().catch(function(){});
-      _source = _ctx.createBufferSource();
-      _source.buffer = _decoded;
-      _source.loop = true;
-      var g = _ctx.createGain();
-      g.gain.value = musicVolume;
-      _source.connect(g);
-      g.connect(_ctx.destination);
-      _source.start(0, offset || 0);
-      _startTime = (_ctx.currentTime || 0) - (offset || 0);
-      musicPlaying = true;
+
+      function doPlay() {
+        if (_source) { try { _source.stop(); } catch(e) {} _source = null; }
+        _source = _ctx.createBufferSource();
+        _source.buffer = _decoded;
+        _source.loop = true;
+        var g = _ctx.createGain();
+        g.gain.value = musicVolume;
+        _source.connect(g);
+        g.connect(_ctx.destination);
+        _source.start(0, offset || 0);
+        _startTime = (_ctx.currentTime || 0) - (offset || 0);
+        musicPlaying = true;
+      }
+
+      if (_ctx.state === 'suspended') {
+        _ctx.resume().then(doPlay).catch(function() {
+          // resume 失败时降级到 Audio 元素
+          _fallbackAudio.currentTime = offset || 0;
+          _fallbackAudio.play().catch(function(){});
+          musicPlaying = true;
+        });
+      } else {
+        doPlay();
+      }
     }
 
     function _stopWasm() {
