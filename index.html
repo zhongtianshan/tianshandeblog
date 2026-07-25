@@ -28,6 +28,13 @@
     <div class="music-btn" id="music-btn" onclick="toggleMusic()">♪</div>
     <span class="music-btn" id="toggle-bars" onclick="toggleBars()" title="边框开关">▦</span>
     <span class="music-btn" id="toggle-letters" onclick="toggleLetters()" title="字母开关">A</span>
+    <!-- 手机端汉堡菜单 -->
+    <span class="hamburger" id="hamburger" onclick="toggleHamburger()">☰</span>
+    <div class="hamburger-menu" id="hamburger-menu">
+      <div class="hm-item" onclick="toggleMusic();closeHamburger()">♪ 背景音乐</div>
+      <div class="hm-item" onclick="toggleBars();closeHamburger()">▦ 边框</div>
+      <div class="hm-item" onclick="toggleLetters();closeHamburger()">A 字母粒子</div>
+    </div>
   </header>
 
   <!-- 主内容 -->
@@ -149,6 +156,9 @@
         musicBtn.classList.add('on');
         musicPlaying = true;
       }
+      // 同步汉堡菜单状态
+      var mi = document.querySelectorAll('.hm-item');
+      if (mi[0]) mi[0].classList.toggle('hm-on', musicPlaying);
     }
 
     // 尝试自动播放
@@ -156,6 +166,9 @@
       musicBtn.textContent = '♫';
       musicBtn.classList.add('on');
       musicPlaying = true;
+      // 同步汉堡菜单
+      var mi = document.querySelectorAll('.hm-item');
+      if (mi[0]) mi[0].classList.add('hm-on');
     }).catch(function() {
       // 浏览器阻止自动播放，首次点击页面任意位置时启动
       var startOnce = function() {
@@ -164,6 +177,9 @@
           musicBtn.textContent = '♫';
           musicBtn.classList.add('on');
           musicPlaying = true;
+          // 同步汉堡菜单
+          var mi = document.querySelectorAll('.hm-item');
+          if (mi[0]) mi[0].classList.add('hm-on');
         }
         document.removeEventListener('click', startOnce);
         document.removeEventListener('touchstart', startOnce);
@@ -171,6 +187,13 @@
       document.addEventListener('click', startOnce);
       document.addEventListener('touchstart', startOnce);
     });
+
+    // 初始化汉堡菜单状态（边框和字母默认开启）
+    (function() {
+      var mi = document.querySelectorAll('.hm-item');
+      if (mi[1]) mi[1].classList.add('hm-on');
+      if (mi[2]) mi[2].classList.add('hm-on');
+    })();
   </script>
 
   <!-- marked.js -->
@@ -404,6 +427,9 @@
       var display = barsVisible ? '' : 'none';
       bars.forEach(function(b) { b.style.display = display; });
       document.getElementById('toggle-bars').classList.toggle('off', !barsVisible);
+      // 同步汉堡菜单状态
+      var mi = document.querySelectorAll('.hm-item');
+      if (mi[1]) mi[1].classList.toggle('hm-on', barsVisible);
     }
 
     function toggleLetters() {
@@ -411,7 +437,34 @@
       var canvas = document.getElementById('edge-letters');
       if (canvas) canvas.style.display = lettersVisible ? '' : 'none';
       document.getElementById('toggle-letters').classList.toggle('off', !lettersVisible);
+      // 同步汉堡菜单状态
+      var mi = document.querySelectorAll('.hm-item');
+      if (mi[2]) mi[2].classList.toggle('hm-on', lettersVisible);
     }
+
+    function toggleHamburger() {
+      var btn = document.getElementById('hamburger');
+      var menu = document.getElementById('hamburger-menu');
+      var open = menu.classList.toggle('open');
+      btn.classList.toggle('open', open);
+    }
+
+    function closeHamburger() {
+      var btn = document.getElementById('hamburger');
+      var menu = document.getElementById('hamburger-menu');
+      menu.classList.remove('open');
+      btn.classList.remove('open');
+    }
+
+    // 点击汉堡菜单外部关闭菜单
+    document.addEventListener('click', function(e) {
+      var menu = document.getElementById('hamburger-menu');
+      var btn = document.getElementById('hamburger');
+      if (menu.classList.contains('open') && !menu.contains(e.target) && e.target !== btn) {
+        menu.classList.remove('open');
+        btn.classList.remove('open');
+      }
+    });
   </script>
 
   <!-- 注册 Service Worker：缓存帧动画到本地设备 -->

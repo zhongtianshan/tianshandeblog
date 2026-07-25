@@ -327,6 +327,63 @@ header .scanline-header {
   50% { box-shadow: 0 0 5px rgba(255, 0, 128, 0.2), 0 0 20px rgba(255, 0, 128, 0.05); }
 }
 
+/* ===== 手机端汉堡菜单 ===== */
+.hamburger {
+  display: none;
+}
+
+.hamburger-menu {
+  display: none;
+  position: absolute;
+  top: 68px;
+  right: 10px;
+  z-index: 10199;
+  min-width: 160px;
+  background: var(--bg-glass);
+  border: 1px solid var(--border);
+  border-top-color: var(--cyan);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), 0 0 15px rgba(0, 240, 255, 0.1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.hamburger-menu.open {
+  display: block;
+  animation: hmFadeIn 0.15s ease;
+}
+
+@keyframes hmFadeIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.hm-item {
+  display: block;
+  padding: 14px 20px;
+  font-size: 0.85em;
+  color: var(--text-dim);
+  border-bottom: 1px solid var(--border);
+  cursor: url('../cursors/pointer.png') 11 5, pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  -webkit-tap-highlight-color: rgba(0, 240, 255, 0.15);
+}
+
+.hm-item:last-child {
+  border-bottom: none;
+}
+
+.hm-item:hover {
+  color: var(--cyan);
+  background: rgba(0, 240, 255, 0.05);
+  padding-left: 26px;
+}
+
+.hm-item.hm-on {
+  color: var(--magenta);
+  border-left: 3px solid var(--magenta);
+}
+
 /* ===== 平滑切换动画 ===== */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(8px); }
@@ -1116,13 +1173,35 @@ body {
   .post-content code { font-size: 0.9em; }
   .gallery-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
 
-  /* 顶部按钮间距 */
-  #toggle-letters { right: 70px; border-color: var(--cyan); color: var(--cyan); text-shadow: var(--glow-cyan-text); }
-  .music-btn {
-    width: 38px;
-    height: 38px;
-    line-height: 38px;
-    font-size: 1.2em;
+  /* 顶部按钮间距 — 手机端用汉堡菜单替代 */
+  #music-btn, #toggle-bars, #toggle-letters {
+    display: none;
+  }
+  .hamburger {
+    display: block;
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    line-height: 40px;
+    text-align: center;
+    font-size: 1.4em;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    cursor: url('../cursors/pointer.png') 11 5, pointer;
+    transition: all 0.3s ease;
+    user-select: none;
+    z-index: 10200;
+  }
+  .hamburger:active {
+    border-color: var(--cyan);
+    color: var(--cyan);
+  }
+  .hamburger.open {
+    border-color: var(--cyan);
+    color: var(--cyan);
+    box-shadow: var(--glow-cyan);
   }
 
   /* Lightbox */
