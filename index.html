@@ -201,9 +201,16 @@
         _ctx.resume().then(doPlay).catch(function() {
           // resume 失败 → 降级到 Audio 元素
           _fallbackAudio.currentTime = offset || 0;
-          _fallbackAudio.play().catch(function(){});
-          musicPlaying = true;
-          _syncMusicUI();
+          var _fp2 = _fallbackAudio.play();
+          if (_fp2 && _fp2.then) {
+            _fp2.then(function() {
+              musicPlaying = true;
+              _syncMusicUI();
+            }).catch(function(){});
+          } else {
+            musicPlaying = true;
+            _syncMusicUI();
+          }
         });
       } else {
         doPlay();
@@ -234,7 +241,9 @@
       if (mi[2]) mi[2].classList.add('hm-on');
     })();
 
-    // 自动启动背景音乐：首次用户交互（点击/触摸/按键）时播放
+    // 自动启动背景音乐：首次用户交互（点击/按键）时播放
+    // 注意：只用 click，不用 touchstart——手机端滚动也会触发 touchstart
+    // 但不会被浏览器视为有效手势，导致播放失败后 UI 误显示为播放中
     (function() {
       var _autoStarted = false;
       function _autoPlay() {
@@ -245,11 +254,9 @@
           _playWasm(0);
         }
         document.removeEventListener('click', _autoPlay);
-        document.removeEventListener('touchstart', _autoPlay);
         document.removeEventListener('keydown', _autoPlay);
       }
       document.addEventListener('click', _autoPlay);
-      document.addEventListener('touchstart', _autoPlay);
       document.addEventListener('keydown', _autoPlay);
     })();
   </script>
