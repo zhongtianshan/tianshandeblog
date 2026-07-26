@@ -781,20 +781,30 @@
           noise.start(t); noise.stop(t + duration);
         } else {
           // ====== 二次崩坏 (0.15-0.2s) ======
-          // 快速方波俯冲 + 削波 = 粗暴数字断裂
-          var o = ctx.createOscillator();
-          o.type = 'square';
-          o.frequency.setValueAtTime(2000, t);
-          o.frequency.exponentialRampToValueAtTime(30, t + duration);
+          // 参考主崩坏的感觉，但平一点：正弦快速下落 + 轻颤
+          var o1 = ctx.createOscillator();
+          o1.type = 'sine';
+          o1.frequency.setValueAtTime(440, t);
+          o1.frequency.exponentialRampToValueAtTime(60, t + duration);
           var g1 = ctx.createGain();
           g1.gain.setValueAtTime(0, t);
-          g1.gain.linearRampToValueAtTime(0.6 * intensity, t + 0.01);
+          g1.gain.linearRampToValueAtTime(0.35 * intensity, t + 0.01);
           g1.gain.exponentialRampToValueAtTime(0.001, t + duration);
 
-          o.connect(shaper);
-          shaper.connect(g1);
-          g1.connect(ctx.destination);
-          o.start(t); o.stop(t + duration + 0.05);
+          var o2 = ctx.createOscillator();
+          o2.type = 'sine';
+          o2.frequency.setValueAtTime(880, t);
+          o2.frequency.linearRampToValueAtTime(400, t + duration * 0.3);
+          o2.frequency.exponentialRampToValueAtTime(40, t + duration);
+          var g2 = ctx.createGain();
+          g2.gain.setValueAtTime(0, t);
+          g2.gain.linearRampToValueAtTime(0.15 * intensity, t + 0.02);
+          g2.gain.exponentialRampToValueAtTime(0.001, t + duration * 0.7);
+
+          o1.connect(g1); g1.connect(ctx.destination);
+          o2.connect(g2); g2.connect(ctx.destination);
+          o1.start(t); o1.stop(t + duration + 0.05);
+          o2.start(t); o2.stop(t + duration + 0.05);
         }
       }
 
@@ -821,9 +831,9 @@
         titleEl.style.clipPath = 'inset(0 0 0 0)';
         void titleEl.offsetWidth;
         titleEl.classList.add('glitch-burst');
-        // 两次崩坏音效
-        playGlitch(0.15, 0.5);
-        setTimeout(function() { if (!_skipped) playGlitch(0.2, 0.6); }, 300);
+        // 两次崩坏音效（平一点，不抢主崩坏）
+        playGlitch(0.15, 0.35);
+        setTimeout(function() { if (!_skipped) playGlitch(0.18, 0.45); }, 300);
         _phaseTimer = setTimeout(fadeOut, 900);
       }
 
