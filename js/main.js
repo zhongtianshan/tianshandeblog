@@ -808,7 +808,8 @@ document.addEventListener('keydown', function(e) {
   var _pianoNotes = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25];
   var _pianoIdx = 0;
   var _pianoCtx = null;
-  var _longPressInterval = null;
+  var _longPressTimer = null;
+  var _longPressDelay = 500;
 
   // 连击提示
   var _combo = 0;
@@ -923,8 +924,10 @@ document.addEventListener('keydown', function(e) {
       ring.classList.add('pressed');
       startVibe();
 
-      // 长按：每 0.5s 连击 + 钢琴同步推进
-      _longPressInterval = setInterval(function() {
+      // 长按：加速连击 + 钢琴同步推进（500ms 起步，逐次加快，上限 80ms）
+      _longPressDelay = 500;
+      function longPressTick() {
+        if (!holding) return;
         _combo++;
         // 更新连击显示
         var r2 = ring.getBoundingClientRect();
@@ -953,14 +956,18 @@ document.addEventListener('keydown', function(e) {
           _comboEl.style.opacity = '0';
           _combo = 0;
         }, 1200);
-      }, 500);
+        // 加速：每次减 30ms，最低 80ms
+        _longPressDelay = Math.max(80, _longPressDelay - 30);
+        _longPressTimer = setTimeout(longPressTick, _longPressDelay);
+      }
+      longPressTick();
     }, 250);
 
     function onRelease() {
       clearTimeout(longTimer);
-      if (_longPressInterval) {
-        clearInterval(_longPressInterval);
-        _longPressInterval = null;
+      if (_longPressTimer) {
+        clearTimeout(_longPressTimer);
+        _longPressTimer = null;
       }
       stopVibe();
       if (holding) {
