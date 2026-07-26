@@ -714,68 +714,87 @@
         } catch(e) {}
       }
 
-      // 合成崩坏音效：纯正弦波电子碎裂感
+      // 合成崩坏音效：故意做糙，旧电脑死机撕裂感
       function buildGlitchSound(duration, intensity) {
         var ctx = _glitchCtx;
         var t = ctx.currentTime;
 
+        // 共用失真效果（硬削波）
+        var shaper = ctx.createWaveShaper();
+        var curve = new Float32Array(256);
+        for (var i = 0; i < 256; i++) {
+          var x = (i / 128) - 1;
+          curve[i] = Math.tanh(x * 3);
+        }
+        shaper.curve = curve;
+
         if (duration > 0.3) {
           // ====== 主崩坏 (0.6s) ======
-          // 主音：880→55Hz 正弦下落，核心碎裂感
+          // 方波 + 失真 = 粗暴撕裂声
           var osc = ctx.createOscillator();
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(880, t);
-          osc.frequency.exponentialRampToValueAtTime(55, t + duration);
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(220, t);
+          osc.frequency.linearRampToValueAtTime(120, t + 0.08);
+          osc.frequency.exponentialRampToValueAtTime(30, t + duration);
           var g = ctx.createGain();
           g.gain.setValueAtTime(0, t);
-          g.gain.linearRampToValueAtTime(0.5 * intensity, t + 0.03);
-          g.gain.setValueAtTime(0.5 * intensity, t + 0.12);
+          g.gain.linearRampToValueAtTime(0.6 * intensity, t + 0.03);
+          g.gain.setValueAtTime(0.5 * intensity, t + 0.1);
           g.gain.exponentialRampToValueAtTime(0.001, t + duration);
 
-          // 颤音层：高频颤振产生数字抖动 (fm 效果)
-          var wobble = ctx.createOscillator();
-          wobble.type = 'sine';
-          wobble.frequency.setValueAtTime(1800, t);
-          wobble.frequency.linearRampToValueAtTime(600, t + duration * 0.4);
-          wobble.frequency.exponentialRampToValueAtTime(20, t + duration);
-          var gw = ctx.createGain();
-          gw.gain.setValueAtTime(0, t);
-          gw.gain.linearRampToValueAtTime(0.2 * intensity, t + 0.05);
-          gw.gain.linearRampToValueAtTime(0.15 * intensity, t + 0.15);
-          gw.gain.exponentialRampToValueAtTime(0.001, t + duration * 0.7);
-
-          osc.connect(g);
-          g.connect(ctx.destination);
-          wobble.connect(gw);
-          gw.connect(ctx.destination);
-
-          osc.start(t); osc.stop(t + duration + 0.05);
-          wobble.start(t); wobble.stop(t + duration + 0.05);
-        } else {
-          // ====== 二次崩坏 (0.15-0.2s) ======
-          // 双正弦快速下落：干净的数字断裂声
-          var osc1 = ctx.createOscillator();
-          osc1.type = 'sine';
-          osc1.frequency.setValueAtTime(1200, t);
-          osc1.frequency.exponentialRampToValueAtTime(60, t + duration);
-          var g1 = ctx.createGain();
-          g1.gain.setValueAtTime(0, t);
-          g1.gain.linearRampToValueAtTime(0.45 * intensity, t + 0.01);
-          g1.gain.exponentialRampToValueAtTime(0.001, t + duration);
-
+          // 第二层：更高频的方波错乱感
           var osc2 = ctx.createOscillator();
-          osc2.type = 'sine';
-          osc2.frequency.setValueAtTime(1600, t);
-          osc2.frequency.exponentialRampToValueAtTime(100, t + duration);
+          osc2.type = 'square';
+          osc2.frequency.setValueAtTime(1800, t);
+          osc2.frequency.linearRampToValueAtTime(900, t + 0.06);
+          osc2.frequency.exponentialRampToValueAtTime(40, t + duration);
           var g2 = ctx.createGain();
           g2.gain.setValueAtTime(0, t);
-          g2.gain.linearRampToValueAtTime(0.25 * intensity, t + 0.02);
-          g2.gain.exponentialRampToValueAtTime(0.001, t + duration);
+          g2.gain.linearRampToValueAtTime(0.25 * intensity, t + 0.04);
+          g2.gain.exponentialRampToValueAtTime(0.001, t + duration * 0.6);
 
-          osc1.connect(g1); g1.connect(ctx.destination);
-          osc2.connect(g2); g2.connect(ctx.destination);
-          osc1.start(t); osc1.stop(t + duration + 0.05);
+          // 噪声层：硬失真白噪
+          var sr = ctx.sampleRate || 44100;
+          var bufSize = Math.floor(sr * duration);
+          var buf = ctx.createBuffer(1, bufSize, sr);
+          var data = buf.getChannelData(0);
+          for (var i = 0; i < bufSize; i++) data[i] = Math.random() * 2 - 1;
+          var noise = ctx.createBufferSource();
+          noise.buffer = buf;
+          var gn = ctx.createGain();
+          gn.gain.setValueAtTime(0.3 * intensity, t);
+          gn.gain.exponentialRampToValueAtTime(0.001, t + duration * 0.5);
+
+          // 方波1 → 失真 → 输出
+          osc.connect(shaper);
+          shaper.connect(g);
+          g.connect(ctx.destination);
+          // 方波2 直出
+          osc2.connect(g2);
+          g2.connect(ctx.destination);
+          // 噪声 → 失真 → 输出
+          noise.connect(gn);
+          gn.connect(ctx.destination);
+
+          osc.start(t); osc.stop(t + duration + 0.05);
           osc2.start(t); osc2.stop(t + duration + 0.05);
+          noise.start(t); noise.stop(t + duration);
+        } else {
+          // ====== 二次崩坏 (0.15-0.2s) ======
+          // 快速方波俯冲 + 削波 = 粗暴数字断裂
+          var o = ctx.createOscillator();
+          o.type = 'square';
+          o.frequency.setValueAtTime(2000, t);
+          o.frequency.exponentialRampToValueAtTime(30, t + duration);
+          var g1 = ctx.createGain();
+          g1.gain.setValueAtTime(0, t);
+          g1.gain.linearRampToValueAtTime(0.6 * intensity, t + 0.01);
+          g1.gain.exponentialRampToValueAtTime(0.001, t + duration);
+
+          o.connect(shaper);
+          shaper.connect(g1);
+          g1.connect(ctx.destination);
+          o.start(t); o.stop(t + duration + 0.05);
         }
       }
 
