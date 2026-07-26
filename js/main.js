@@ -808,6 +808,7 @@ document.addEventListener('keydown', function(e) {
   var _pianoNotes = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25];
   var _pianoIdx = 0;
   var _pianoCtx = null;
+  var _longPressInterval = null;
 
   // 连击提示
   var _combo = 0;
@@ -921,10 +922,46 @@ document.addEventListener('keydown', function(e) {
       holding = true;
       ring.classList.add('pressed');
       startVibe();
+
+      // 长按：每 0.5s 连击 + 钢琴同步推进
+      _longPressInterval = setInterval(function() {
+        _combo++;
+        // 更新连击显示
+        var r2 = ring.getBoundingClientRect();
+        _comboEl.textContent = 'x' + _combo;
+        _comboEl.style.left = (r2.left + r2.width / 2) + 'px';
+        _comboEl.style.top = (r2.top - 58) + 'px';
+        _comboEl.style.opacity = '1';
+        var hue = (_combo * 14 + 100) % 360;
+        _comboEl.style.color = 'hsl(' + hue + ', 100%, 55%)';
+        _comboEl.style.textShadow = '0 0 8px hsla(' + hue + ',100%,55%,0.8),0 0 25px hsla(' + hue + ',100%,55%,0.3)';
+        // 原位跳动反馈
+        _comboEl.animate([
+          { transform: 'scale(1.1)' },
+          { transform: 'scale(1)' }
+        ], { duration: 200, easing: 'ease-out' });
+        // 同步钢琴
+        playPianoNote(_pianoNotes[_pianoIdx]);
+        _pianoIdx = (_pianoIdx + 1) % _pianoNotes.length;
+        // 重置渐隐计时
+        if (_comboTimer) clearTimeout(_comboTimer);
+        _comboTimer = setTimeout(function() {
+          _comboEl.animate([
+            { opacity: '1', transform: 'scale(1)' },
+            { opacity: '0', transform: 'scale(0.6)' }
+          ], { duration: 250, easing: 'ease-in' });
+          _comboEl.style.opacity = '0';
+          _combo = 0;
+        }, 1200);
+      }, 500);
     }, 250);
 
     function onRelease() {
       clearTimeout(longTimer);
+      if (_longPressInterval) {
+        clearInterval(_longPressInterval);
+        _longPressInterval = null;
+      }
       stopVibe();
       if (holding) {
         // 长按松手：放大回去
