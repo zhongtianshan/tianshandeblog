@@ -888,8 +888,17 @@
 
   <!-- 开关控制 -->
   <script>
-    var barsVisible = true;
-    var lettersVisible = true;
+    var isMobile = !window.matchMedia || !window.matchMedia('(pointer: fine)').matches;
+    var barsVisible = !isMobile;
+    var lettersVisible = !isMobile;
+    // 手机端默认隐藏边框和字母粒子
+    if (isMobile) {
+      document.querySelectorAll('.bar-left, .bar-right, .bar-top, .bar-bottom').forEach(function(b) { b.style.display = 'none'; });
+      var ec = document.getElementById('edge-letters');
+      if (ec) ec.style.display = 'none';
+      document.getElementById('toggle-bars').classList.add('off');
+      document.getElementById('toggle-letters').classList.add('off');
+    }
 
     function toggleBars() {
       barsVisible = !barsVisible;
