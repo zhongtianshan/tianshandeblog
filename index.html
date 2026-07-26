@@ -714,91 +714,68 @@
         } catch(e) {}
       }
 
-      // 合成崩坏音效：低频轰鸣 + 高频碎裂 + 噪声爆破
+      // 合成崩坏音效：纯正弦波电子碎裂感
       function buildGlitchSound(duration, intensity) {
         var ctx = _glitchCtx;
         var t = ctx.currentTime;
-        var sr = ctx.sampleRate || 44100;
-
-        // --- 噪声部分（共用） ---
-        var bufSize = Math.floor(sr * duration);
-        var buf = ctx.createBuffer(1, bufSize, sr);
-        var data = buf.getChannelData(0);
-        for (var i = 0; i < bufSize; i++) data[i] = Math.random() * 2 - 1;
-        var noise = ctx.createBufferSource();
-        noise.buffer = buf;
 
         if (duration > 0.3) {
           // ====== 主崩坏 (0.6s) ======
-          // 1. 低频轰鸣：80→40Hz 正弦，模拟电力过载
-          var oscLow = ctx.createOscillator();
-          oscLow.type = 'sine';
-          oscLow.frequency.setValueAtTime(80, t);
-          oscLow.frequency.exponentialRampToValueAtTime(40, t + duration);
-          var gLow = ctx.createGain();
-          gLow.gain.setValueAtTime(0, t);
-          gLow.gain.linearRampToValueAtTime(0.5 * intensity, t + 0.08);
-          gLow.gain.exponentialRampToValueAtTime(0.001, t + duration);
-
-          // 2. 高频碎裂：4kHz→200Hz 锯齿波，数据崩溃感
-          var oscHigh = ctx.createOscillator();
-          oscHigh.type = 'sawtooth';
-          oscHigh.frequency.setValueAtTime(4000, t);
-          oscHigh.frequency.exponentialRampToValueAtTime(200, t + duration);
-          var gHigh = ctx.createGain();
-          gHigh.gain.setValueAtTime(0, t);
-          gHigh.gain.linearRampToValueAtTime(0.18 * intensity, t + 0.04);
-          gHigh.gain.exponentialRampToValueAtTime(0.001, t + duration * 0.75);
-
-          // 3. 噪声爆破：带通滤波
-          var bp = ctx.createBiquadFilter();
-          bp.type = 'bandpass';
-          bp.frequency.value = 1200 + Math.random() * 800;
-          bp.Q.value = 2;
-          var gNoise = ctx.createGain();
-          gNoise.gain.setValueAtTime(0.35 * intensity, t);
-          gNoise.gain.exponentialRampToValueAtTime(0.001, t + duration * 0.6);
-
-          noise.connect(bp);
-          bp.connect(gNoise);
-          gNoise.connect(ctx.destination);
-
-          oscLow.connect(gLow);
-          gLow.connect(ctx.destination);
-          oscHigh.connect(gHigh);
-          gHigh.connect(ctx.destination);
-
-          oscLow.start(t); oscLow.stop(t + duration + 0.05);
-          oscHigh.start(t); oscHigh.stop(t + duration + 0.05);
-          noise.start(t); noise.stop(t + duration);
-        } else {
-          // ====== 二次崩坏 (0.15-0.2s) ======
-          // 短促数字碎裂：快速俯冲 + 噪声爆破
+          // 主音：880→55Hz 正弦下落，核心碎裂感
           var osc = ctx.createOscillator();
-          osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(2500, t);
-          osc.frequency.exponentialRampToValueAtTime(80, t + duration);
-          var g1 = ctx.createGain();
-          g1.gain.setValueAtTime(0, t);
-          g1.gain.linearRampToValueAtTime(0.4 * intensity, t + 0.02);
-          g1.gain.exponentialRampToValueAtTime(0.001, t + duration);
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(880, t);
+          osc.frequency.exponentialRampToValueAtTime(55, t + duration);
+          var g = ctx.createGain();
+          g.gain.setValueAtTime(0, t);
+          g.gain.linearRampToValueAtTime(0.5 * intensity, t + 0.03);
+          g.gain.setValueAtTime(0.5 * intensity, t + 0.12);
+          g.gain.exponentialRampToValueAtTime(0.001, t + duration);
 
-          var bp2 = ctx.createBiquadFilter();
-          bp2.type = 'bandpass';
-          bp2.frequency.value = 2000;
-          bp2.Q.value = 1.5;
-          var g2 = ctx.createGain();
-          g2.gain.setValueAtTime(0.3 * intensity, t);
-          g2.gain.exponentialRampToValueAtTime(0.001, t + duration * 0.7);
+          // 颤音层：高频颤振产生数字抖动 (fm 效果)
+          var wobble = ctx.createOscillator();
+          wobble.type = 'sine';
+          wobble.frequency.setValueAtTime(1800, t);
+          wobble.frequency.linearRampToValueAtTime(600, t + duration * 0.4);
+          wobble.frequency.exponentialRampToValueAtTime(20, t + duration);
+          var gw = ctx.createGain();
+          gw.gain.setValueAtTime(0, t);
+          gw.gain.linearRampToValueAtTime(0.2 * intensity, t + 0.05);
+          gw.gain.linearRampToValueAtTime(0.15 * intensity, t + 0.15);
+          gw.gain.exponentialRampToValueAtTime(0.001, t + duration * 0.7);
 
-          noise.connect(bp2);
-          bp2.connect(g2);
-          g2.connect(ctx.destination);
-          osc.connect(g1);
-          g1.connect(ctx.destination);
+          osc.connect(g);
+          g.connect(ctx.destination);
+          wobble.connect(gw);
+          gw.connect(ctx.destination);
 
           osc.start(t); osc.stop(t + duration + 0.05);
-          noise.start(t); noise.stop(t + duration);
+          wobble.start(t); wobble.stop(t + duration + 0.05);
+        } else {
+          // ====== 二次崩坏 (0.15-0.2s) ======
+          // 双正弦快速下落：干净的数字断裂声
+          var osc1 = ctx.createOscillator();
+          osc1.type = 'sine';
+          osc1.frequency.setValueAtTime(1200, t);
+          osc1.frequency.exponentialRampToValueAtTime(60, t + duration);
+          var g1 = ctx.createGain();
+          g1.gain.setValueAtTime(0, t);
+          g1.gain.linearRampToValueAtTime(0.45 * intensity, t + 0.01);
+          g1.gain.exponentialRampToValueAtTime(0.001, t + duration);
+
+          var osc2 = ctx.createOscillator();
+          osc2.type = 'sine';
+          osc2.frequency.setValueAtTime(1600, t);
+          osc2.frequency.exponentialRampToValueAtTime(100, t + duration);
+          var g2 = ctx.createGain();
+          g2.gain.setValueAtTime(0, t);
+          g2.gain.linearRampToValueAtTime(0.25 * intensity, t + 0.02);
+          g2.gain.exponentialRampToValueAtTime(0.001, t + duration);
+
+          osc1.connect(g1); g1.connect(ctx.destination);
+          osc2.connect(g2); g2.connect(ctx.destination);
+          osc1.start(t); osc1.stop(t + duration + 0.05);
+          osc2.start(t); osc2.stop(t + duration + 0.05);
         }
       }
 
