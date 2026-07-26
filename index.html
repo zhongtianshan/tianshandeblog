@@ -1001,6 +1001,7 @@
       function revealTitle() {
         if (_skipped) return;
         terminal.style.display = 'none';
+        document.getElementById('boot-prompt').style.display = 'none';
         titleEl.style.display = 'block';
         void titleEl.offsetWidth;
         titleEl.classList.add('reveal');
