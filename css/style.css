@@ -1447,6 +1447,23 @@ body {
   animation: twBlink 0.6s step-end infinite;
 }
 
+/* 底部等待输入提示 */
+#boot-audio-hint {
+  position: absolute;
+  bottom: 50px;
+  right: 40px;
+  font-family: "Minecraft", monospace;
+  font-size: 0.75em;
+  color: var(--green, #00ff41);
+  opacity: 0.5;
+  text-shadow: 0 0 6px rgba(0,255,65,0.3);
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+#boot-audio-hint .cursor-blink {
+  animation: twBlink 0.6s step-end infinite;
+}
+
 /* Glitch 标题 */
 #boot-title {
   font-family: "Minecraft", monospace;
@@ -1677,6 +1694,11 @@ header .subtitle.fade-in {
     font-size: 2.4em;
     letter-spacing: 4px;
     top: 44%;
+  }
+  #boot-audio-hint {
+    bottom: 30px;
+    right: 20px;
+    font-size: 0.65em;
   }
 }
 

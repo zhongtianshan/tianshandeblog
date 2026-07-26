@@ -20,6 +20,7 @@
       <div id="boot-line3"></div>
     </div>
     <div id="boot-title" data-text="中天山">中天山</div>
+    <div id="boot-audio-hint">> <span class="cursor-blink">_</span></div>
     <div id="boot-scanline"></div>
   </div>
 
@@ -677,6 +678,9 @@
         document.removeEventListener('click', _unlockGlitch);
         document.removeEventListener('touchstart', _unlockGlitch);
         document.removeEventListener('keydown', _unlockGlitch);
+        // 隐藏等待提示
+        var hint = document.getElementById('boot-audio-hint');
+        if (hint) hint.style.opacity = '0';
         if (_glitchCtx && _glitchCtx.state === 'suspended') {
           _glitchCtx.resume().catch(function(){});
         }
