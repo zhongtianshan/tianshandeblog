@@ -1430,21 +1430,18 @@ body {
 /* 终端文字 */
 #boot-terminal {
   position: absolute;
-  top: 60px;
-  left: 30px;
+  top: 30px;
+  left: 25px;
+  right: 25px;
+  bottom: 70px;
   font-family: "Minecraft", monospace;
   font-size: 0.85em;
   color: var(--green, #00ff41);
   text-align: left;
-  width: 440px;
   text-shadow: 0 0 6px rgba(0,255,65,0.6);
-  line-height: 1.8;
-}
-
-/* 光标闪烁 */
-#boot-terminal::after {
-  content: '█';
-  animation: twBlink 0.6s step-end infinite;
+  line-height: 1.5;
+  overflow-y: auto;
+  white-space: nowrap;
 }
 
 /* SKIP 按钮 */
@@ -1692,10 +1689,12 @@ header .subtitle.fade-in {
 /* ===== 手机端：开机动画适配 ===== */
 @media (max-width: 600px) {
   #boot-terminal {
-    font-size: 0.7em;
-    width: 320px;
-    top: 40px;
-    left: 20px;
+    font-size: 0.65em;
+    top: 20px;
+    left: 14px;
+    right: 14px;
+    bottom: 55px;
+    line-height: 1.4;
   }
   #boot-title {
     font-size: 2.4em;

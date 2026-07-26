@@ -14,14 +14,7 @@
 <body>
   <!-- 开机动画遮罩 -->
   <div id="boot-overlay">
-    <div id="boot-terminal">
-      <div id="boot-line1"></div>
-      <div id="boot-line2"></div>
-      <div id="boot-line3"></div>
-      <div id="boot-line4"></div>
-      <div id="boot-line5"></div>
-      <div id="boot-line6"></div>
-    </div>
+    <div id="boot-terminal"></div>
     <div id="boot-title" data-text="中天山">中天山</div>
     <div id="boot-skip">SKIP</div>
     <div id="boot-scanline"></div>
@@ -618,9 +611,6 @@
       }
 
       var terminal = document.getElementById('boot-terminal');
-      var line1 = document.getElementById('boot-line1');
-      var line2 = document.getElementById('boot-line2');
-      var line3 = document.getElementById('boot-line3');
       var titleEl = document.getElementById('boot-title');
 
       // 点击遮罩只解锁音频，不跳过
@@ -633,60 +623,103 @@
         if (_skipped) return;
         _skipped = true;
         if (_phaseTimer) clearTimeout(_phaseTimer);
+        if (_cascadeTimer) clearTimeout(_cascadeTimer);
         overlay.classList.add('fade-out');
         setTimeout(function() {
           removeOverlay();
         }, 300);
       });
 
-      // ===== Phase 1: 终端打字 (0 - 800ms) =====
-      var lines = [
-        '> SYS_INIT: LOADING CYBERFRAME v3.1.4...',
-        '> SYS_INIT: MOUNTING SECURE CHANNEL............ OK',
-        '> SYS_INIT: DECRYPTING KERNEL MODULES.......... OK',
-        '> SYS_INIT: CHECKING SYSTEM INTEGRITY.......... PASS',
-        '> SYS_INIT: ESTABLISHING LINK.................. '
+      // ===== Phase 1: 终端代码瀑布 =====
+      // 前几条卡顿 → 后面飞流直下，几秒内铺满全屏
+      var _cascadeLines = [
+        '> SYS_INIT: LOADING CYBERFRAME v3.1.4...............',
+        '> SYS_INIT: MOUNTING SECURE CHANNEL.................',
+        '> SYS_INIT: INITIALIZING HARDWARE ABSTRACTION.......',
+        '> SYS_INIT: VERIFYING BOOT SIGNATURE................',
+        '> MODULE: loading netstack.core.................... OK',
+        '> MODULE: loading crypto.engine.................... OK',
+        '> MODULE: loading ui.shell......................... OK',
+        '> MODULE: loading audio.driver..................... OK',
+        '> MODULE: loading input.handler.................... OK',
+        '> MEM:   scanning 0x7C00-0x9FFF................. PASS',
+        '> MEM:   scanning 0xA000-0xBFFF................. PASS',
+        '> MEM:   scanning 0xC000-0xDFFF................. PASS',
+        '> NET:   assigning link-local address......... 10.0.0.4',
+        '> NET:   gateway reachable........................ OK',
+        '> NET:   DNS resolution........................... OK',
+        '> PROC: spawning sysmonitor.................... PID 142',
+        '> PROC: spawning eventbus...................... PID 156',
+        '> PROC: spawning render.shell.................. PID 201',
+        '> SYS_INIT: FINALIZING............................ OK',
       ];
-      var lineEls = [line1, line2, line3, document.getElementById('boot-line4'), document.getElementById('boot-line5'), document.getElementById('boot-line6')];
-      var charIdx = 0, lineIdx = 0;
+      var _lineEls = [];
+      var _completedLines = 0;
+      var _cascadeTimer = null;
 
-      function typeNext() {
-        if (_skipped) return;
-        if (lineIdx >= lines.length) {
-          showContinuePrompt();
-          return;
-        }
-        if (charIdx < lines[lineIdx].length) {
-          lineEls[lineIdx].textContent += lines[lineIdx][charIdx];
-          charIdx++;
-          setTimeout(typeNext, 10 + Math.random() * 15);
-        } else {
-          charIdx = 0;
-          lineIdx++;
-          setTimeout(typeNext, 150);
-        }
-      }
-      typeNext();
+      // 清空 terminal 并动态创建行元素
+      terminal.innerHTML = '';
+      _cascadeLines.forEach(function() {
+        var el = document.createElement('div');
+        terminal.appendChild(el);
+        _lineEls.push(el);
+      });
+
+      // 为每行启动打字（瀑布式错开启动）
+      _cascadeLines.forEach(function(text, idx) {
+        var startDelay = idx * 45;        // 每行错开 45ms
+        var baseSpeed = idx < 2 ? 60 :     // 前2行: 卡顿
+                       idx < 4 ? 25 :      // 3-4行: 过渡
+                       7;                  // 其余: 飞流
+
+        setTimeout(function() {
+          var pos = 0;
+          var el = _lineEls[idx];
+          function tick() {
+            if (_skipped) return;
+            el.textContent += text[pos];
+            pos++;
+            if (pos >= text.length) {
+              _completedLines++;
+              if (_completedLines >= _cascadeLines.length) {
+                showContinuePrompt();
+              }
+              return;
+            }
+            var delay = baseSpeed;
+            // 前2行卡顿效果：随机变慢
+            if (idx < 2 && Math.random() < 0.13) {
+              delay = 180 + Math.random() * 250;
+            }
+            _cascadeTimer = setTimeout(tick, delay);
+          }
+          tick();
+        }, startDelay);
+      });
 
       // 代码跑完后显示点击继续
       function showContinuePrompt() {
-        var line6 = document.getElementById('boot-line6');
-        if (!line6) return;
-        // 逐字打出 "> 点击任意继续"
+        if (_skipped) return;
+        // 在末尾追加一行 "> 点击任意继续"
+        var promptEl = document.createElement('div');
+        promptEl.id = 'boot-continue';
+        terminal.appendChild(promptEl);
         var text = '> 点击任意继续';
         var i = 0;
         var iv = setInterval(function() {
           if (_skipped) { clearInterval(iv); return; }
-          line6.textContent += text[i];
+          promptEl.textContent += text[i];
           i++;
           if (i >= text.length) clearInterval(iv);
         }, 25);
+        // 滚动到最底部让新行可见
+        terminal.scrollTop = terminal.scrollHeight;
         // 一次点击 → 解锁音频 + 进入崩坏
         overlay.addEventListener('click', function _cont() {
           if (_skipped) return;
           overlay.removeEventListener('click', _cont);
           clearInterval(iv);
-          line6.textContent = text;
+          promptEl.textContent = text;
           _unlockGlitch();
           revealTitle();
         });
