@@ -1468,26 +1468,26 @@ body {
   font-family: "Minecraft", monospace;
   font-size: 0.85em;
   font-weight: bold;
-  color: rgba(0, 240, 255, 0.8);
+  color: #00f0ff;
   cursor: url('../cursors/pointer.png') 11 5, pointer;
   letter-spacing: 3px;
   padding: 8px 16px;
-  border: 1px solid rgba(0, 240, 255, 0.4);
-  background: rgba(0, 240, 255, 0.08);
+  border: 1px solid #00f0ff;
+  background: #000;
   transition: all 0.3s;
   z-index: 10;
-  text-shadow: 0 0 8px rgba(0, 240, 255, 0.3);
+  text-shadow: 0 0 8px rgba(0, 240, 255, 0.5);
   animation: skipPulse 2s ease-in-out infinite;
 }
 #boot-skip:hover {
   color: #fff;
-  border-color: rgba(0, 240, 255, 0.9);
-  background: rgba(0, 240, 255, 0.2);
-  box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+  border-color: #fff;
+  background: #111;
+  box-shadow: 0 0 25px rgba(0, 240, 255, 0.6);
 }
 @keyframes skipPulse {
-  0%, 100% { opacity: 0.7; }
-  50% { opacity: 1; }
+  0%, 100% { box-shadow: 0 0 5px rgba(0, 240, 255, 0.3); }
+  50% { box-shadow: 0 0 18px rgba(0, 240, 255, 0.7); }
 }
 
 /* Glitch 标题 */
