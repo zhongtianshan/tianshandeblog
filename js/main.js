@@ -839,13 +839,21 @@ document.addEventListener('keydown', function(e) {
     else if (_combo >= 5)  _comboEl.style.color = '#00f0ff';
     else                   _comboEl.style.color = '#00ff41';
 
-    // 从 LOGO 中心弹射出来 → 飞到上方
-    _comboEl.animate([
-      { transform: 'translateY(' + flyDist + 'px) scale(0.3)', opacity: '0' },
-      { transform: 'translateY(' + (flyDist * 0.4) + 'px) scale(0.7)', opacity: '1' },
-      { transform: 'translateY(-4px) scale(1.15)', opacity: '1' },
-      { transform: 'translateY(0) scale(1)',       opacity: '1' }
-    ], { duration: 400, easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' });
+    if (_combo === 1) {
+      // 第一次弹出：从 LOGO 中心弹射出来
+      _comboEl.animate([
+        { transform: 'translateY(' + flyDist + 'px) scale(0.3)', opacity: '0' },
+        { transform: 'translateY(' + (flyDist * 0.4) + 'px) scale(0.7)', opacity: '1' },
+        { transform: 'translateY(-4px) scale(1.15)', opacity: '1' },
+        { transform: 'translateY(0) scale(1)',       opacity: '1' }
+      ], { duration: 400, easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' });
+    } else {
+      // 后续连击：只在原位跳动一下
+      _comboEl.animate([
+        { transform: 'scale(1.15)' },
+        { transform: 'scale(1)' }
+      ], { duration: 180, easing: 'ease-out' });
+    }
 
     // 清除旧定时器
     if (_comboTimer) clearTimeout(_comboTimer);
