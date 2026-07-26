@@ -14,7 +14,6 @@
 <body>
   <!-- 开机动画遮罩 -->
   <div id="boot-overlay">
-    <canvas id="boot-rain"></canvas>
     <div id="boot-terminal">
       <div id="boot-line1"></div>
       <div id="boot-line2"></div>
@@ -611,7 +610,6 @@
       var line2 = document.getElementById('boot-line2');
       var line3 = document.getElementById('boot-line3');
       var titleEl = document.getElementById('boot-title');
-      var rainCanvas = document.getElementById('boot-rain');
 
       // 点击遮罩跳过开机动画
       var _skipped = false;
@@ -620,8 +618,6 @@
         if (_skipped) return;
         _skipped = true;
         if (_phaseTimer) clearTimeout(_phaseTimer);
-        if (rainAnimId) cancelAnimationFrame(rainAnimId);
-        rainRunning = false;
         // 快速淡出 300ms 后移除
         overlay.classList.add('fade-out');
         setTimeout(function() {
@@ -641,7 +637,8 @@
       function typeNext() {
         if (_skipped) return;
         if (lineIdx >= lines.length) {
-          startRain();
+          // 终端打字完成，短暂停顿后进入 glitch 揭示
+          _phaseTimer = setTimeout(revealTitle, 500);
           return;
         }
         if (charIdx < lines[lineIdx].length) {
@@ -655,59 +652,6 @@
         }
       }
       typeNext();
-
-      // ===== Phase 2: 代码雨 (800ms - 2200ms) =====
-      var rainCtx = rainCanvas.getContext('2d');
-      var rainDrops = [];
-      var RAIN_COLS, RAIN_ROWS;
-      var rainRunning = false;
-      var rainAnimId = null;
-      var rainChars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789';
-
-      function initRain() {
-        rainCanvas.width = window.innerWidth;
-        rainCanvas.height = window.innerHeight;
-        RAIN_COLS = Math.floor(window.innerWidth / 14);
-        RAIN_ROWS = Math.floor(window.innerHeight / 18);
-        rainDrops = [];
-        for (var i = 0; i < RAIN_COLS; i++) {
-          rainDrops[i] = Math.floor(Math.random() * -RAIN_ROWS);
-        }
-      }
-      initRain();
-      window.addEventListener('resize', initRain);
-
-      function drawRain() {
-        if (!rainRunning) return;
-        rainCtx.fillStyle = 'rgba(0,0,0,0.05)';
-        rainCtx.fillRect(0, 0, rainCanvas.width, rainCanvas.height);
-        rainCtx.font = '14px "Minecraft", monospace';
-        for (var i = 0; i < RAIN_COLS; i++) {
-          var x = i * 14;
-          for (var j = 0; j < 4; j++) {
-            var y = (rainDrops[i] - j) * 18;
-            if (y < 0) continue;
-            var alpha = (1 - j * 0.25) * 0.5;
-            rainCtx.globalAlpha = alpha;
-            rainCtx.fillStyle = j === 0 ? '#00ff41' : '#00f0ff';
-            rainCtx.shadowColor = j === 0 ? '#00ff41' : '#00f0ff';
-            rainCtx.shadowBlur = j === 0 ? 12 : 4;
-            rainCtx.fillText(rainChars[Math.floor(Math.random() * rainChars.length)], x, y);
-          }
-          rainDrops[i]++;
-          if (rainDrops[i] * 18 > rainCanvas.height + 72) rainDrops[i] = 0;
-        }
-        rainCtx.shadowBlur = 0;
-        rainCtx.globalAlpha = 1;
-        rainAnimId = requestAnimationFrame(drawRain);
-      }
-
-      function startRain() {
-        terminal.style.display = 'none';
-        rainRunning = true;
-        drawRain();
-        _phaseTimer = setTimeout(revealTitle, 1400);
-      }
 
       // ===== Web Audio 崩坏音效（iOS 兼容：首次交互时才创建 AudioContext） =====
       var _glitchCtx = null;
@@ -794,9 +738,7 @@
       // ===== Phase 3: 标题 Glitch 揭示 =====
       function revealTitle() {
         if (_skipped) return;
-        rainRunning = false;
-        if (rainAnimId) cancelAnimationFrame(rainAnimId);
-        rainCanvas.style.display = 'none';
+        terminal.style.display = 'none';
         titleEl.style.display = 'block';
         void titleEl.offsetWidth;
         titleEl.classList.add('reveal');

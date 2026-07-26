@@ -1427,12 +1427,6 @@ body {
 }
 
 /* 代码雨 canvas */
-#boot-rain {
-  position: absolute; inset: 0;
-  width: 100%; height: 100%;
-  opacity: 0.4;
-}
-
 /* 终端文字 */
 #boot-terminal {
   position: absolute;
