@@ -702,58 +702,104 @@
           if (_glitchCtx && _glitchCtx.state === 'suspended') {
             _glitchCtx.resume().catch(function(){});
           }
-          // AudioContext 已 running → 直接播
           if (_glitchCtx && _glitchCtx.state === 'running') {
-            var bufSize = Math.floor((_glitchCtx.sampleRate || 44100) * duration);
-            var buf = _glitchCtx.createBuffer(1, bufSize, _glitchCtx.sampleRate || 44100);
-            var data = buf.getChannelData(0);
-            for (var i = 0; i < bufSize; i++) data[i] = (Math.random() * 2 - 1) * intensity;
-            var noise = _glitchCtx.createBufferSource();
-            noise.buffer = buf;
-            var filter = _glitchCtx.createBiquadFilter();
-            filter.type = 'bandpass';
-            filter.frequency.value = 1800 + Math.random() * 1500;
-            filter.Q.value = 3;
-            var gain = _glitchCtx.createGain();
-            var t = _glitchCtx.currentTime;
-            gain.gain.setValueAtTime(0.25, t);
-            gain.gain.exponentialRampToValueAtTime(0.001, t + duration);
-            noise.connect(filter);
-            filter.connect(gain);
-            gain.connect(_glitchCtx.destination);
-            noise.start(t);
-            noise.stop(t + duration);
+            buildGlitchSound(duration, intensity);
             return;
           }
-
-          // 还没 running → 存队列等首次交互解锁
-          var _bufSize = Math.floor(44100 * duration);
-          var _raw = new Float32Array(_bufSize);
-          for (var i = 0; i < _bufSize; i++) _raw[i] = (Math.random() * 2 - 1) * intensity;
-          var _freq = 1800 + Math.random() * 1500;
+          // 还没 running → 存队列
+          var _d = duration, _i = intensity;
           _glitchQueue.push(function() {
-            try {
-              if (!_glitchCtx) return;
-              var buf = _glitchCtx.createBuffer(1, _bufSize, _glitchCtx.sampleRate || 44100);
-              buf.getChannelData(0).set(_raw);
-              var noise = _glitchCtx.createBufferSource();
-              noise.buffer = buf;
-              var filter = _glitchCtx.createBiquadFilter();
-              filter.type = 'bandpass';
-              filter.frequency.value = _freq;
-              filter.Q.value = 3;
-              var gain = _glitchCtx.createGain();
-              var t = _glitchCtx.currentTime;
-              gain.gain.setValueAtTime(0.25, t);
-              gain.gain.exponentialRampToValueAtTime(0.001, t + duration);
-              noise.connect(filter);
-              filter.connect(gain);
-              gain.connect(_glitchCtx.destination);
-              noise.start(t);
-              noise.stop(t + duration);
-            } catch(e) {}
+            try { if (_glitchCtx) buildGlitchSound(_d, _i); } catch(e) {}
           });
         } catch(e) {}
+      }
+
+      // 合成崩坏音效：低频轰鸣 + 高频碎裂 + 噪声爆破
+      function buildGlitchSound(duration, intensity) {
+        var ctx = _glitchCtx;
+        var t = ctx.currentTime;
+        var sr = ctx.sampleRate || 44100;
+
+        // --- 噪声部分（共用） ---
+        var bufSize = Math.floor(sr * duration);
+        var buf = ctx.createBuffer(1, bufSize, sr);
+        var data = buf.getChannelData(0);
+        for (var i = 0; i < bufSize; i++) data[i] = Math.random() * 2 - 1;
+        var noise = ctx.createBufferSource();
+        noise.buffer = buf;
+
+        if (duration > 0.3) {
+          // ====== 主崩坏 (0.6s) ======
+          // 1. 低频轰鸣：80→40Hz 正弦，模拟电力过载
+          var oscLow = ctx.createOscillator();
+          oscLow.type = 'sine';
+          oscLow.frequency.setValueAtTime(80, t);
+          oscLow.frequency.exponentialRampToValueAtTime(40, t + duration);
+          var gLow = ctx.createGain();
+          gLow.gain.setValueAtTime(0, t);
+          gLow.gain.linearRampToValueAtTime(0.5 * intensity, t + 0.08);
+          gLow.gain.exponentialRampToValueAtTime(0.001, t + duration);
+
+          // 2. 高频碎裂：4kHz→200Hz 锯齿波，数据崩溃感
+          var oscHigh = ctx.createOscillator();
+          oscHigh.type = 'sawtooth';
+          oscHigh.frequency.setValueAtTime(4000, t);
+          oscHigh.frequency.exponentialRampToValueAtTime(200, t + duration);
+          var gHigh = ctx.createGain();
+          gHigh.gain.setValueAtTime(0, t);
+          gHigh.gain.linearRampToValueAtTime(0.18 * intensity, t + 0.04);
+          gHigh.gain.exponentialRampToValueAtTime(0.001, t + duration * 0.75);
+
+          // 3. 噪声爆破：带通滤波
+          var bp = ctx.createBiquadFilter();
+          bp.type = 'bandpass';
+          bp.frequency.value = 1200 + Math.random() * 800;
+          bp.Q.value = 2;
+          var gNoise = ctx.createGain();
+          gNoise.gain.setValueAtTime(0.35 * intensity, t);
+          gNoise.gain.exponentialRampToValueAtTime(0.001, t + duration * 0.6);
+
+          noise.connect(bp);
+          bp.connect(gNoise);
+          gNoise.connect(ctx.destination);
+
+          oscLow.connect(gLow);
+          gLow.connect(ctx.destination);
+          oscHigh.connect(gHigh);
+          gHigh.connect(ctx.destination);
+
+          oscLow.start(t); oscLow.stop(t + duration + 0.05);
+          oscHigh.start(t); oscHigh.stop(t + duration + 0.05);
+          noise.start(t); noise.stop(t + duration);
+        } else {
+          // ====== 二次崩坏 (0.15-0.2s) ======
+          // 短促数字碎裂：快速俯冲 + 噪声爆破
+          var osc = ctx.createOscillator();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(2500, t);
+          osc.frequency.exponentialRampToValueAtTime(80, t + duration);
+          var g1 = ctx.createGain();
+          g1.gain.setValueAtTime(0, t);
+          g1.gain.linearRampToValueAtTime(0.4 * intensity, t + 0.02);
+          g1.gain.exponentialRampToValueAtTime(0.001, t + duration);
+
+          var bp2 = ctx.createBiquadFilter();
+          bp2.type = 'bandpass';
+          bp2.frequency.value = 2000;
+          bp2.Q.value = 1.5;
+          var g2 = ctx.createGain();
+          g2.gain.setValueAtTime(0.3 * intensity, t);
+          g2.gain.exponentialRampToValueAtTime(0.001, t + duration * 0.7);
+
+          noise.connect(bp2);
+          bp2.connect(g2);
+          g2.connect(ctx.destination);
+          osc.connect(g1);
+          g1.connect(ctx.destination);
+
+          osc.start(t); osc.stop(t + duration + 0.05);
+          noise.start(t); noise.stop(t + duration);
+        }
       }
 
       // ===== Phase 3: 标题 Glitch 揭示 =====
