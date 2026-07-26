@@ -1472,7 +1472,7 @@ body {
   font-family: "Minecraft", monospace;
   font-size: 0.7em;
   color: rgba(0, 240, 255, 0.4);
-  cursor: pointer;
+  cursor: url('../cursors/pointer.png') 11 5, pointer;
   letter-spacing: 2px;
   padding: 6px 12px;
   border: 1px solid rgba(0, 240, 255, 0.2);
