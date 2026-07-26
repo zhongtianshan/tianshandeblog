@@ -929,6 +929,7 @@ document.addEventListener('keydown', function(e) {
       function longPressTick() {
         if (!holding) return;
         _combo++;
+        lastTap = Date.now(); // 同步短按计时，防止切换时 gap 过大重置连击
         // 更新连击显示
         var r2 = ring.getBoundingClientRect();
         _comboEl.textContent = 'x' + _combo;
