@@ -138,8 +138,9 @@ function renderPostList() {
 
   blogData.posts.forEach((post, index) => {
     const card = document.createElement('div');
-    card.className = 'post-card';
-    card.onclick = () => showPost(index);
+    card.className = 'post-card scroll-hidden';
+    card.style.setProperty('--delay', (index * 0.1) + 's');
+    card.onclick = () => showPost(index, card);
 
     card.innerHTML = `
       <span class="post-number">#${String(blogData.posts.length - index).padStart(2, '0')}</span>
@@ -152,10 +153,81 @@ function renderPostList() {
     `;
     container.appendChild(card);
   });
+
+  observePostCards();
 }
 
-// ===== 展示文章 =====
-function showPost(index) {
+// ===== 代码雨过渡动画 =====
+function showCodeRain(opts) {
+  opts = opts || {};
+  var duration = opts.duration || 1200;
+  var callback = opts.callback || function(){};
+
+  var overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;z-index:999;top:0;left:0;width:100vw;height:100vh;background:#0a0a0f';
+
+  var canvas = document.createElement('canvas');
+  overlay.appendChild(canvas);
+  document.body.appendChild(overlay);
+
+  var ctx = canvas.getContext('2d');
+  var W, H, cols, rows, drops = [], running = true;
+  var chars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789';
+
+  function resize() {
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+    cols = Math.floor(W / 14);
+    rows = Math.floor(H / 18);
+    drops = [];
+    for (var i = 0; i < cols; i++) drops[i] = Math.floor(Math.random() * -rows);
+  }
+  resize();
+
+  function draw() {
+    if (!running) return;
+    ctx.fillStyle = 'rgba(0,0,0,0.05)';
+    ctx.fillRect(0, 0, W, H);
+    ctx.font = '14px "Minecraft", monospace';
+    for (var i = 0; i < cols; i++) {
+      var x = i * 14;
+      for (var j = 0; j < 4; j++) {
+        var y = (drops[i] - j) * 18;
+        if (y < 0) continue;
+        var alpha = (1 - j * 0.25) * 0.5;
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = j === 0 ? '#00ff41' : '#00f0ff';
+        ctx.shadowColor = j === 0 ? '#00ff41' : '#00f0ff';
+        ctx.shadowBlur = j === 0 ? 12 : 4;
+        ctx.fillText(chars[Math.floor(Math.random() * chars.length)], x, y);
+      }
+      drops[i]++;
+      if (drops[i] * 18 > H + 72) drops[i] = 0;
+    }
+    ctx.shadowBlur = 0;
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(draw);
+  }
+  draw();
+
+  setTimeout(function() {
+    running = false;
+    overlay.style.transition = 'opacity 0.3s ease';
+    overlay.style.opacity = '0';
+    setTimeout(function() {
+      overlay.remove();
+      if (callback) callback();
+    }, 300);
+  }, duration);
+}
+
+// ===== 展示文章（代码雨过渡） =====
+var _savedScrollY = 0;
+
+function showPost(index, cardEl) {
+  // 保存当前滚动位置，返回时恢复
+  _savedScrollY = window.scrollY;
+
   const post = blogData.posts[index];
   const listView = document.getElementById('post-list');
   const postView = document.getElementById('post-view');
@@ -166,56 +238,239 @@ function showPost(index) {
     try { _inlineAudios[i].pause(); } catch(e) {}
   }
   _inlineAudios = [];
-  // 切文章时恢复背景音乐
   resumeBgMusic();
-  content.innerHTML = '';
 
-  listView.style.display = 'none';
-  document.getElementById('gallery').style.display = 'none';
-  document.querySelector('.search-box').style.display = 'none';
-  document.getElementById('tag-filter').style.display = 'none';
-  postView.style.display = 'block';
-  postView.classList.remove('fade-in');
-  void postView.offsetWidth;
-  postView.classList.add('fade-in');
-
-  // 直接从 data.js 里拿内容，不 fetch
-  // 自定义链接语法：[链接](url)(名称) → 标准 markdown 链接
-  // 兼容有无反斜杠转义、有无空格
+  // 渲染内容（作为模板）
   var text = post.content.replace(
     /[！!]\s*\\?\[链接\\?\]\s*\(([^)]+)\)\s*\(([^)]+)\)/g,
     '[$2]($1)'
   );
-  const html = marked.parse(text);
-  content.innerHTML = html;
+  content.innerHTML = marked.parse(text);
 
-  // 处理图片和音频
-  var imgs = content.querySelectorAll('img');
-  for (var i = 0; i < imgs.length; i++) {
-    var src = imgs[i].getAttribute('src');
-    if (!src || src.indexOf('/') !== -1) continue;
+  if (cardEl) {
+    var cardRect = cardEl.getBoundingClientRect();
 
-    if (imgs[i].getAttribute('alt') === '音频') {
-      // 音频标记：替换为播放器
-      var player = createAudioPlayer(src);
-      imgs[i].parentNode.replaceChild(player, imgs[i]);
-    } else {
-      // 普通图片：补全路径
-      imgs[i].src = 'images/wenzhang/' + src;
+    // 隐藏列表
+    listView.style.display = 'none';
+    document.getElementById('gallery').style.display = 'none';
+    document.querySelector('.search-box').style.display = 'none';
+    document.getElementById('tag-filter').style.display = 'none';
+
+    // 创建展开元素，从卡片位置开始
+    var expander = document.createElement('div');
+    expander.id = 'fs-expander';
+    expander.style.cssText =
+      'position:fixed;z-index:99;' +
+      'top:' + cardRect.top + 'px;left:' + cardRect.left + 'px;' +
+      'width:' + cardRect.width + 'px;height:' + cardRect.height + 'px;' +
+      'background:var(--bg-primary);border:1px solid var(--cyan);' +
+      'border-radius:4px;overflow:hidden;' +
+      'box-shadow:0 0 20px rgba(0,240,255,0.2);' +
+      'transition:all 0.4s cubic-bezier(0.4,0,0.2,1)';
+    document.body.appendChild(expander);
+
+    void expander.offsetWidth;
+
+    // 展开到全屏
+    expander.style.top = '0';
+    expander.style.left = '0';
+    expander.style.width = '100vw';
+    expander.style.height = '100vh';
+    expander.style.borderRadius = '0';
+    expander.style.boxShadow = '0 0 50px rgba(0,240,255,0.35)';
+
+    // 展开完成，在 expander 内渲染正文
+    setTimeout(function() {
+      expander.style.overflow = 'auto';
+      expander.style.padding = '40px 20px';
+      expander.style.display = 'flex';
+      expander.style.justifyContent = 'center';
+
+      // 阅读容器
+      var reader = document.createElement('div');
+      reader.style.cssText =
+        'max-width:900px;width:100%;' +
+        'opacity:0;transition:opacity 0.5s ease';
+
+      // 返回按钮（调用 goBack → 代码雨过渡）
+      var backBtn = document.createElement('button');
+      backBtn.className = 'back-btn';
+      backBtn.textContent = '<< 返回列表';
+      backBtn.onclick = goBack;
+      reader.appendChild(backBtn);
+
+      // 文章内容
+      var contentDiv = document.createElement('div');
+      contentDiv.className = 'post-content';
+      contentDiv.innerHTML = content.innerHTML;
+      reader.appendChild(contentDiv);
+
+      expander.innerHTML = '';
+      expander.appendChild(reader);
+
+      // 内容淡入
+      void reader.offsetWidth;
+      reader.style.opacity = '1';
+
+      // 处理图片
+      var imgs = contentDiv.querySelectorAll('img');
+      for (var i = 0; i < imgs.length; i++) {
+        var src = imgs[i].getAttribute('src');
+        if (!src || src.indexOf('/') !== -1) continue;
+        if (imgs[i].getAttribute('alt') === '音频') {
+          var player = createAudioPlayer(src);
+          imgs[i].parentNode.replaceChild(player, imgs[i]);
+        } else {
+          imgs[i].src = 'images/wenzhang/' + src;
+        }
+      }
+
+      // 链接在新标签页打开
+      var links = contentDiv.querySelectorAll('a');
+      for (var i = 0; i < links.length; i++) {
+        links[i].setAttribute('target', '_blank');
+        links[i].setAttribute('rel', 'noopener');
+      }
+    }, 400);
+  } else {
+    // 无卡片→直接显示 post-view
+    content.style.opacity = '';
+    postView.style.display = 'block';
+    postView.classList.remove('fade-in');
+    void postView.offsetWidth;
+    postView.classList.add('fade-in');
+
+    var imgs = content.querySelectorAll('img');
+    for (var i = 0; i < imgs.length; i++) {
+      var src = imgs[i].getAttribute('src');
+      if (!src || src.indexOf('/') !== -1) continue;
+      if (imgs[i].getAttribute('alt') === '音频') {
+        var player = createAudioPlayer(src);
+        imgs[i].parentNode.replaceChild(player, imgs[i]);
+      } else {
+        imgs[i].src = 'images/wenzhang/' + src;
+      }
+    }
+    var links = content.querySelectorAll('a');
+    for (var i = 0; i < links.length; i++) {
+      links[i].setAttribute('target', '_blank');
+      links[i].setAttribute('rel', 'noopener');
     }
   }
-
-  // 文章里的链接在新标签页打开
-  var links = content.querySelectorAll('a');
-  for (var i = 0; i < links.length; i++) {
-    links[i].setAttribute('target', '_blank');
-    links[i].setAttribute('rel', 'noopener');
-  }
-
-  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ===== 返回列表 =====
+// ===== 返回列表（代码雨流完 → 纯背景 → UI 淡入） =====
+function goBack() {
+  // 暂停所有内联音频
+  for (var i = 0; i < _inlineAudios.length; i++) {
+    try { _inlineAudios[i].pause(); } catch(e) {}
+  }
+  _inlineAudios = [];
+  resumeBgMusic();
+
+  // 隐藏展开器
+  var expander = document.getElementById('fs-expander');
+  if (expander) expander.style.display = 'none';
+
+  // 清理 post-view
+  document.getElementById('post-content').innerHTML = '';
+  document.getElementById('post-view').style.display = 'none';
+
+  // 准备列表显示状态（先不展示）
+  document.getElementById('post-list').style.display = 'block';
+  document.querySelector('.search-box').style.display = '';
+  document.getElementById('tag-filter').style.display = '';
+  document.getElementById('gallery').style.display = 'none';
+  document.getElementById('status').style.display = 'none';
+
+  var header = document.querySelector('header');
+  var tabs = document.querySelector('.tabs');
+  var container = document.querySelector('.container');
+
+  // 立即隐藏所有 UI（代码雨期间只有背景动画 + 字符）
+  if (header) { header.style.opacity = '0'; header.style.transition = 'none'; }
+  if (tabs) { tabs.style.opacity = '0'; tabs.style.transition = 'none'; }
+  if (container) { container.style.opacity = '0'; container.style.transition = 'none'; }
+
+  // 趁代码雨悄悄滚回上次位置（用户看不到）
+  window.scrollTo(0, _savedScrollY);
+
+  // === 代码雨（透明 canvas，背景可见） ===
+  var overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;z-index:999;top:0;left:0;width:100vw;height:100vh;pointer-events:none';
+  var rainCanvas = document.createElement('canvas');
+  overlay.appendChild(rainCanvas);
+  document.body.appendChild(overlay);
+
+  var ctx = rainCanvas.getContext('2d');
+  var W = window.innerWidth, H = window.innerHeight;
+  rainCanvas.width = W; rainCanvas.height = H;
+  var cols = Math.floor(W / 14);
+  var drops = [];
+  for (var i = 0; i < cols; i++) drops[i] = Math.floor(Math.random() * -Math.floor(H / 18));
+  var rainChars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789';
+  var running = true, draining = false;
+
+  function drawRain() {
+    if (!running) return;
+    ctx.clearRect(0, 0, W, H); // 透明清除，背景透出
+    ctx.font = '14px "Minecraft", monospace';
+    var anyOnScreen = false;
+    for (var i = 0; i < cols; i++) {
+      var x = i * 14;
+      for (var j = 0; j < 4; j++) {
+        var y = (drops[i] - j) * 18;
+        if (y < 0) continue;
+        if (y < H) anyOnScreen = true;
+        var alpha = (1 - j * 0.25) * 0.8;
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = j === 0 ? '#00ff41' : '#00f0ff';
+        ctx.shadowColor = j === 0 ? '#00ff41' : '#00f0ff';
+        ctx.shadowBlur = j === 0 ? 12 : 4;
+        ctx.fillText(rainChars[Math.floor(Math.random() * rainChars.length)], x, y);
+      }
+      drops[i]++;
+      if (!draining && drops[i] * 18 > H + 72) drops[i] = 0;
+    }
+    ctx.shadowBlur = 0; ctx.globalAlpha = 1;
+
+    if (draining && !anyOnScreen) {
+      running = false;
+      afterRainDrained();
+      return;
+    }
+    requestAnimationFrame(drawRain);
+  }
+  drawRain();
+
+  var uiEls = [header, tabs, container];
+
+  // 0.5s 后排空（字符不再重置，自然往下掉）
+  setTimeout(function() { draining = true; }, 500);
+
+  // 1.0s 后 UI 开始淡入（雨下够了再出现）
+  setTimeout(function() {
+    uiEls.forEach(function(el) {
+      if (el) { el.style.transition = 'opacity 0.35s ease'; el.style.opacity = '1'; }
+    });
+    setTimeout(function() {
+      uiEls.forEach(function(el) { if (el) el.style.transition = ''; });
+    }, 350);
+  }, 1000);
+
+  var safetyTimer = setTimeout(function() {
+    if (running) { running = false; afterRainDrained(); }
+  }, 2500);
+
+  function afterRainDrained() {
+    clearTimeout(safetyTimer);
+    // UI 已经显示了，只需清理 canvas
+    overlay.remove();
+    if (expander) expander.remove();
+  }
+}
+
+// ===== 恢复背景音乐（被文章内音频暂停时调用） =====
 function resumeBgMusic() {
   if (_bgSavedState.wasPlaying && !musicPlaying) {
     if (typeof _playWasm === 'function') {
@@ -223,20 +478,6 @@ function resumeBgMusic() {
     }
     _bgSavedState.wasPlaying = false;
   }
-}
-
-function goBack() {
-  // 暂停所有内联音频
-  for (var i = 0; i < _inlineAudios.length; i++) {
-    try { _inlineAudios[i].pause(); } catch(e) {}
-  }
-  _inlineAudios = [];
-  // 恢复被文章音频暂停的背景音乐
-  resumeBgMusic();
-  document.getElementById('post-content').innerHTML = '';
-  document.getElementById('post-view').style.display = 'none';
-  switchTab('posts');
-  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // ===== 图片画廊 =====
@@ -406,6 +647,11 @@ function switchTab(name) {
     list.classList.remove('fade-in');
     void list.offsetWidth;
     list.classList.add('fade-in');
+    // 标签筛选器也加淡入
+    var tf = document.getElementById('tag-filter');
+    tf.classList.remove('fade-in');
+    void tf.offsetWidth;
+    tf.classList.add('fade-in');
     searchInput.placeholder = '搜索文章...';
     document.getElementById('tag-filter').style.display = '';
   }
@@ -627,6 +873,35 @@ document.addEventListener('keydown', function(e) {
   // 阻止浏览器默认的长按菜单（保存图片等）
   ring.addEventListener('contextmenu', function(e) { e.preventDefault(); });
 })();
+
+// ===== 文章卡片滚动动画 =====
+function observePostCards() {
+  if (!('IntersectionObserver' in window)) {
+    // 降级：直接显示全部
+    document.querySelectorAll('.post-card.scroll-hidden').forEach(function(card) {
+      card.classList.remove('scroll-hidden');
+      card.classList.add('scroll-visible');
+    });
+    return;
+  }
+
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.remove('scroll-hidden');
+        entry.target.classList.add('scroll-visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, {
+    rootMargin: '0px 0px -60px 0px',
+    threshold: 0
+  });
+
+  document.querySelectorAll('.post-card.scroll-hidden').forEach(function(card) {
+    observer.observe(card);
+  });
+}
 
 // ===== 启动 =====
 init();

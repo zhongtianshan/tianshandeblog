@@ -12,6 +12,18 @@
   <link rel="stylesheet" href="css/style.css?v=202607250002">
 </head>
 <body>
+  <!-- 开机动画遮罩 -->
+  <div id="boot-overlay">
+    <canvas id="boot-rain"></canvas>
+    <div id="boot-terminal">
+      <div id="boot-line1"></div>
+      <div id="boot-line2"></div>
+      <div id="boot-line3"></div>
+    </div>
+    <div id="boot-title" data-text="中天山">中天山</div>
+    <div id="boot-scanline"></div>
+  </div>
+
   <!-- 视频背景（由 JS 动态加载） -->
   <div id="video-bg"></div>
   <span class="bar-left"></span>
@@ -244,20 +256,33 @@
     // 自动启动背景音乐：首次用户交互（点击/按键）时播放
     // 注意：只用 click，不用 touchstart——手机端滚动也会触发 touchstart
     // 但不会被浏览器视为有效手势，导致播放失败后 UI 误显示为播放中
+    // 等开机动画完成后再绑定交互监听，避免在开机期间误触发
     (function() {
-      var _autoStarted = false;
-      function _autoPlay() {
-        if (_autoStarted) return;
-        _autoStarted = true;
-        if (!musicPlaying) {
-          _pauseTime = 0;
-          _playWasm(0);
+      var _enabled = false;
+      function _enableAutoPlay() {
+        if (_enabled) return;
+        _enabled = true;
+        var _autoStarted = false;
+        function _autoPlay() {
+          if (_autoStarted) return;
+          _autoStarted = true;
+          if (!musicPlaying) {
+            _pauseTime = 0;
+            _playWasm(0);
+          }
+          document.removeEventListener('click', _autoPlay);
+          document.removeEventListener('keydown', _autoPlay);
         }
-        document.removeEventListener('click', _autoPlay);
-        document.removeEventListener('keydown', _autoPlay);
+        document.addEventListener('click', _autoPlay);
+        document.addEventListener('keydown', _autoPlay);
       }
-      document.addEventListener('click', _autoPlay);
-      document.addEventListener('keydown', _autoPlay);
+
+      // 等 boot-complete 事件后启用自动播放
+      window.addEventListener('boot-complete', _enableAutoPlay);
+      // 兜底：如果 5 秒后还没触发（比如 boot-complete 没发出），也启用
+      setTimeout(function() {
+        _enableAutoPlay();
+      }, 5000);
     })();
   </script>
 
@@ -320,10 +345,9 @@
   <!-- 主脚本 -->
   <script src="js/main.js?v=202607250002"></script>
 
-  <!-- 赛博朋克粒子拖尾（仅 PC 鼠标有效） -->
+  <!-- 鼠标涟漪拖尾（Neon Ripple Trail） -->
   <script>
     (function() {
-      // 仅 PC 鼠标生效：检测当前主要输入设备是否为精细指针（鼠标）
       if (!window.matchMedia || !window.matchMedia('(pointer: fine)').matches) return;
 
       var canvas = document.createElement('canvas');
@@ -333,78 +357,111 @@
 
       var ctx = canvas.getContext('2d');
       var W, H;
-
-      function resize() {
-        W = canvas.width = window.innerWidth;
-        H = canvas.height = window.innerHeight;
-      }
+      function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
       resize();
       window.addEventListener('resize', resize);
 
-      var particles = [];
-      var colors = ['#00f0ff', '#ff0080', '#7000ff', '#00ff41', '#ffd700'];
-      var maxParticles = 120;
-
-      function addParticles(x, y, count, dx, dy) {
-        var len = Math.sqrt(dx * dx + dy * dy) || 1;
-        var nx = dx / len;
-        var ny = dy / len;
-        for (var i = 0; i < count; i++) {
-          if (particles.length >= maxParticles) {
-            particles.shift();
-          }
-          // 粒子朝鼠标移动反方向散射（拖尾效果）
-          var speed = Math.random() * 1.5 + 0.5;
-          var angle = Math.atan2(-ny, -nx) + (Math.random() - 0.5) * 1.6;
-          particles.push({
-            x: x + (Math.random() - 0.5) * 8,
-            y: y + (Math.random() - 0.5) * 8,
-            vx: Math.cos(angle) * speed + (Math.random() - 0.5) * 0.5,
-            vy: Math.sin(angle) * speed + (Math.random() - 0.5) * 0.5,
-            size: Math.random() * 4 + 1,
-            color: colors[Math.floor(Math.random() * colors.length)],
-            life: 1,
-            decay: Math.random() * 0.025 + 0.015
-          });
-        }
-      }
-
+      var ripples = [];
+      var sparks = [];
       var lastX = 0, lastY = 0, moved = false;
+      var _fc = 0;
+
       document.addEventListener('mousemove', function(e) {
-        if (!moved) {
-          lastX = e.clientX;
-          lastY = e.clientY;
-          moved = true;
-          return;
-        }
+        if (!moved) { lastX = e.clientX; lastY = e.clientY; moved = true; return; }
         var dx = e.clientX - lastX;
         var dy = e.clientY - lastY;
         var dist = Math.sqrt(dx * dx + dy * dy);
-        var count = Math.min(Math.floor(dist / 4) + 1, 3);
-        // 粒子从光标尾部（非尖部）冒出
-        addParticles(lastX + 18, lastY + 20, count, dx, dy);
+        if (dist > 5) {
+          // 涟漪
+          ripples.push({
+            x: e.clientX, y: e.clientY,
+            r: 4, maxR: Math.min(40 + dist * 0.5, 90),
+            life: 1, decay: 0.015 + Math.random() * 0.01,
+            hue: 180 + Math.random() * 60
+          });
+          // 迸射火星
+          var n = Math.min(Math.floor(dist * 0.15), 6);
+          for (var i = 0; i < n; i++) {
+            var a = Math.atan2(-dy, -dx) + (Math.random() - 0.5) * 1.8;
+            var s = Math.random() * 2 + 0.5;
+            sparks.push({
+              x: e.clientX + (Math.random() - 0.5) * 6,
+              y: e.clientY + (Math.random() - 0.5) * 6,
+              vx: Math.cos(a) * s + (Math.random() - 0.5) * 0.5,
+              vy: Math.sin(a) * s + (Math.random() - 0.5) * 0.5,
+              size: Math.random() * 3 + 1,
+              hue: 180 + Math.random() * 180,
+              life: 1, decay: 0.02 + Math.random() * 0.02
+            });
+          }
+          // 限制数量
+          if (ripples.length > 30) ripples.shift();
+          if (sparks.length > 150) sparks.splice(0, sparks.length - 150);
+        }
         lastX = e.clientX;
         lastY = e.clientY;
       });
 
+      // 点击爆发 → 大涟漪
+      document.addEventListener('click', function(e) {
+        for (var k = 0; k < 3; k++) {
+          ripples.push({
+            x: e.clientX + (Math.random() - 0.5) * 20,
+            y: e.clientY + (Math.random() - 0.5) * 20,
+            r: 5, maxR: 120 + Math.random() * 40,
+            life: 1, decay: 0.008,
+            hue: Math.random() * 360
+          });
+        }
+        for (var i = 0; i < 30; i++) {
+          var a = Math.random() * Math.PI * 2;
+          var s = Math.random() * 4 + 1;
+          sparks.push({
+            x: e.clientX, y: e.clientY,
+            vx: Math.cos(a) * s, vy: Math.sin(a) * s,
+            size: Math.random() * 4 + 1,
+            hue: Math.random() * 360,
+            life: 1, decay: 0.015 + Math.random() * 0.01
+          });
+        }
+      });
+
       function animate() {
         ctx.clearRect(0, 0, W, H);
-        for (var i = particles.length - 1; i >= 0; i--) {
-          var p = particles[i];
-          p.x += p.vx;
-          p.y += p.vy;
-          p.vy += 0.02;
-          p.life -= p.decay;
-          if (p.life <= 0) {
-            particles.splice(i, 1);
-            continue;
-          }
-          ctx.globalAlpha = p.life;
-          ctx.fillStyle = p.color;
-          ctx.shadowColor = p.color;
+        _fc++;
+
+        // 更新 + 绘制涟漪
+        for (var i = ripples.length - 1; i >= 0; i--) {
+          var rp = ripples[i];
+          rp.r += (rp.maxR - rp.r) * 0.08;
+          rp.life -= rp.decay;
+          if (rp.life <= 0) { ripples.splice(i, 1); continue; }
+          var alpha = rp.life * 0.35;
+          ctx.globalAlpha = alpha;
+          ctx.beginPath();
+          ctx.arc(rp.x, rp.y, rp.r, 0, Math.PI * 2);
+          ctx.strokeStyle = 'hsl(' + rp.hue + ', 100%, 60%)';
+          ctx.lineWidth = 1.5 * rp.life;
+          ctx.shadowColor = 'hsl(' + rp.hue + ', 100%, 60%)';
+          ctx.shadowBlur = 12;
+          ctx.stroke();
+        }
+        ctx.shadowBlur = 0;
+
+        // 更新 + 绘制火星
+        for (var i = sparks.length - 1; i >= 0; i--) {
+          var sp = sparks[i];
+          sp.x += sp.vx;
+          sp.y += sp.vy;
+          sp.vy += 0.04;
+          sp.life -= sp.decay;
+          if (sp.life <= 0) { sparks.splice(i, 1); continue; }
+          ctx.globalAlpha = sp.life * 0.8;
+          ctx.fillStyle = 'hsl(' + sp.hue + ', 100%, 70%)';
+          ctx.shadowColor = 'hsl(' + sp.hue + ', 100%, 60%)';
           ctx.shadowBlur = 8;
           ctx.beginPath();
-          ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+          ctx.arc(sp.x, sp.y, sp.size * sp.life, 0, Math.PI * 2);
           ctx.fill();
         }
         ctx.shadowBlur = 0;
@@ -532,6 +589,302 @@
     })();
   </script>
 
+
+  <!-- ===== 开机动画 ===== -->
+  <script>
+    (function() {
+      var overlay = document.getElementById('boot-overlay');
+      if (!overlay) return;
+
+      // sessionStorage 检测（try/catch 兼容隐私模式）
+      var isFirstLoad = true;
+      try { isFirstLoad = !sessionStorage.getItem('tianshan-booted'); } catch(e) {}
+
+      if (!isFirstLoad) {
+        overlay.style.display = 'none';
+        window.dispatchEvent(new CustomEvent('boot-complete'));
+        return;
+      }
+
+      var terminal = document.getElementById('boot-terminal');
+      var line1 = document.getElementById('boot-line1');
+      var line2 = document.getElementById('boot-line2');
+      var line3 = document.getElementById('boot-line3');
+      var titleEl = document.getElementById('boot-title');
+      var rainCanvas = document.getElementById('boot-rain');
+
+      // 点击遮罩跳过开机动画
+      var _skipped = false;
+      var _phaseTimer = null;
+      overlay.addEventListener('click', function() {
+        if (_skipped) return;
+        _skipped = true;
+        if (_phaseTimer) clearTimeout(_phaseTimer);
+        if (rainAnimId) cancelAnimationFrame(rainAnimId);
+        rainRunning = false;
+        // 快速淡出 300ms 后移除
+        overlay.classList.add('fade-out');
+        setTimeout(function() {
+          removeOverlay();
+        }, 300);
+      });
+
+      // ===== Phase 1: 终端打字 (0 - 800ms) =====
+      var lines = [
+        '> INITIALIZING CYBERSYSTEM...',
+        '> LOADING KERNEL MODULES...',
+        '> SYSTEM READY.'
+      ];
+      var lineEls = [line1, line2, line3];
+      var charIdx = 0, lineIdx = 0;
+
+      function typeNext() {
+        if (_skipped) return;
+        if (lineIdx >= lines.length) {
+          startRain();
+          return;
+        }
+        if (charIdx < lines[lineIdx].length) {
+          lineEls[lineIdx].textContent += lines[lineIdx][charIdx];
+          charIdx++;
+          setTimeout(typeNext, 25 + Math.random() * 20);
+        } else {
+          charIdx = 0;
+          lineIdx++;
+          setTimeout(typeNext, 150);
+        }
+      }
+      typeNext();
+
+      // ===== Phase 2: 代码雨 (800ms - 2200ms) =====
+      var rainCtx = rainCanvas.getContext('2d');
+      var rainDrops = [];
+      var RAIN_COLS, RAIN_ROWS;
+      var rainRunning = false;
+      var rainAnimId = null;
+      var rainChars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789';
+
+      function initRain() {
+        rainCanvas.width = window.innerWidth;
+        rainCanvas.height = window.innerHeight;
+        RAIN_COLS = Math.floor(window.innerWidth / 14);
+        RAIN_ROWS = Math.floor(window.innerHeight / 18);
+        rainDrops = [];
+        for (var i = 0; i < RAIN_COLS; i++) {
+          rainDrops[i] = Math.floor(Math.random() * -RAIN_ROWS);
+        }
+      }
+      initRain();
+      window.addEventListener('resize', initRain);
+
+      function drawRain() {
+        if (!rainRunning) return;
+        rainCtx.fillStyle = 'rgba(0,0,0,0.05)';
+        rainCtx.fillRect(0, 0, rainCanvas.width, rainCanvas.height);
+        rainCtx.font = '14px "Minecraft", monospace';
+        for (var i = 0; i < RAIN_COLS; i++) {
+          var x = i * 14;
+          for (var j = 0; j < 4; j++) {
+            var y = (rainDrops[i] - j) * 18;
+            if (y < 0) continue;
+            var alpha = (1 - j * 0.25) * 0.5;
+            rainCtx.globalAlpha = alpha;
+            rainCtx.fillStyle = j === 0 ? '#00ff41' : '#00f0ff';
+            rainCtx.shadowColor = j === 0 ? '#00ff41' : '#00f0ff';
+            rainCtx.shadowBlur = j === 0 ? 12 : 4;
+            rainCtx.fillText(rainChars[Math.floor(Math.random() * rainChars.length)], x, y);
+          }
+          rainDrops[i]++;
+          if (rainDrops[i] * 18 > rainCanvas.height + 72) rainDrops[i] = 0;
+        }
+        rainCtx.shadowBlur = 0;
+        rainCtx.globalAlpha = 1;
+        rainAnimId = requestAnimationFrame(drawRain);
+      }
+
+      function startRain() {
+        terminal.style.display = 'none';
+        rainRunning = true;
+        drawRain();
+        _phaseTimer = setTimeout(revealTitle, 1400);
+      }
+
+      // ===== Web Audio 崩坏音效（iOS 兼容：首次交互时才创建 AudioContext） =====
+      var _glitchCtx = null;
+      var _glitchQueue = [];
+
+      // 首次交互时创建 AudioContext + 刷队列
+      function _unlockGlitch() {
+        document.removeEventListener('click', _unlockGlitch);
+        document.removeEventListener('touchstart', _unlockGlitch);
+        document.removeEventListener('keydown', _unlockGlitch);
+        // 在用户手势中创建（iOS Safari 硬性要求）
+        if (!_glitchCtx) {
+          try { _glitchCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
+        }
+        if (_glitchCtx && _glitchCtx.state === 'suspended') {
+          _glitchCtx.resume().catch(function(){});
+        }
+        // 刷队列
+        var q = _glitchQueue.slice();
+        _glitchQueue = [];
+        q.forEach(function(play) { try { play(); } catch(e) {} });
+      }
+      document.addEventListener('click', _unlockGlitch);
+      document.addEventListener('touchstart', _unlockGlitch);
+      document.addEventListener('keydown', _unlockGlitch);
+
+      function playGlitch(duration, intensity) {
+        try {
+          // 还没 AudioContext → 存队列等首次交互
+          if (!_glitchCtx || _glitchCtx.state !== 'running') {
+            // 先把音源数据构好（避免闭包引用问题）
+            var _bufSize = Math.floor(44100 * duration);
+            var _raw = new Float32Array(_bufSize);
+            for (var i = 0; i < _bufSize; i++) _raw[i] = (Math.random() * 2 - 1) * intensity;
+            var _freq = 1800 + Math.random() * 1500;
+            _glitchQueue.push(function() {
+              try {
+                if (!_glitchCtx) return;
+                var buf = _glitchCtx.createBuffer(1, _bufSize, _glitchCtx.sampleRate || 44100);
+                buf.getChannelData(0).set(_raw);
+                var noise = _glitchCtx.createBufferSource();
+                noise.buffer = buf;
+                var filter = _glitchCtx.createBiquadFilter();
+                filter.type = 'bandpass';
+                filter.frequency.value = _freq;
+                filter.Q.value = 3;
+                var gain = _glitchCtx.createGain();
+                var t = _glitchCtx.currentTime;
+                gain.gain.setValueAtTime(0.25, t);
+                gain.gain.exponentialRampToValueAtTime(0.001, t + duration);
+                noise.connect(filter);
+                filter.connect(gain);
+                gain.connect(_glitchCtx.destination);
+                noise.start(t);
+                noise.stop(t + duration);
+              } catch(e) {}
+            });
+            return;
+          }
+
+          // AudioContext 已 running → 直接播
+          var bufSize = Math.floor((_glitchCtx.sampleRate || 44100) * duration);
+          var buf = _glitchCtx.createBuffer(1, bufSize, _glitchCtx.sampleRate || 44100);
+          var data = buf.getChannelData(0);
+          for (var i = 0; i < bufSize; i++) data[i] = (Math.random() * 2 - 1) * intensity;
+          var noise = _glitchCtx.createBufferSource();
+          noise.buffer = buf;
+          var filter = _glitchCtx.createBiquadFilter();
+          filter.type = 'bandpass';
+          filter.frequency.value = 1800 + Math.random() * 1500;
+          filter.Q.value = 3;
+          var gain = _glitchCtx.createGain();
+          var t = _glitchCtx.currentTime;
+          gain.gain.setValueAtTime(0.25, t);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + duration);
+          noise.connect(filter);
+          filter.connect(gain);
+          gain.connect(_glitchCtx.destination);
+          noise.start(t);
+          noise.stop(t + duration);
+        } catch(e) {}
+      }
+
+      // ===== Phase 3: 标题 Glitch 揭示 =====
+      function revealTitle() {
+        if (_skipped) return;
+        rainRunning = false;
+        if (rainAnimId) cancelAnimationFrame(rainAnimId);
+        rainCanvas.style.display = 'none';
+        titleEl.style.display = 'block';
+        void titleEl.offsetWidth;
+        titleEl.classList.add('reveal');
+        // 主崩坏音效
+        playGlitch(0.6, 0.7);
+        // 主崩坏 1.5s 结束后，触发结尾二次崩坏
+        _phaseTimer = setTimeout(triggerFinalBurst, 1800);
+      }
+
+      // ===== Phase 4: 结尾二次崩坏 → 淡出 =====
+      function triggerFinalBurst() {
+        if (_skipped) return;
+        // 清除 reveal 动画，回到稳定可见状态
+        titleEl.classList.remove('reveal');
+        titleEl.style.opacity = '1';
+        titleEl.style.transform = 'translate(-50%, -50%)';
+        titleEl.style.clipPath = 'inset(0 0 0 0)';
+        void titleEl.offsetWidth;
+        titleEl.classList.add('glitch-burst');
+        // 两次崩坏音效
+        playGlitch(0.15, 0.5);
+        setTimeout(function() { if (!_skipped) playGlitch(0.2, 0.6); }, 300);
+        _phaseTimer = setTimeout(fadeOut, 900);
+      }
+
+      // ===== Phase 5: 淡出 =====
+      function fadeOut() {
+        if (_skipped) return;
+        overlay.classList.add('fade-out');
+        _phaseTimer = setTimeout(removeOverlay, 800);
+      }
+
+      function removeOverlay() {
+        overlay.classList.add('hidden');
+        try { sessionStorage.setItem('tianshan-booted', 'true'); } catch(e) {}
+        window.dispatchEvent(new CustomEvent('boot-complete'));
+      }
+    })();
+  </script>
+
+  <!-- ===== 打字机效果 ===== -->
+  <script>
+    (function() {
+      var h1 = document.querySelector('header h1');
+      var subtitle = document.querySelector('header .subtitle');
+      if (!h1 || !subtitle) return;
+
+      var fullText = h1.textContent.trim();
+
+      // sessionStorage 检测是否首次加载
+      var isFirstLoad = true;
+      try { isFirstLoad = !sessionStorage.getItem('tianshan-booted'); } catch(e) {}
+
+      function startTypewriter() {
+        h1.textContent = '';
+        h1.classList.add('typewriter');
+        var idx = 0;
+        var typeInterval = setInterval(function() {
+          if (idx < fullText.length) {
+            h1.textContent += fullText[idx];
+            idx++;
+          } else {
+            clearInterval(typeInterval);
+            h1.classList.remove('typewriter');
+            setTimeout(function() {
+              subtitle.classList.add('fade-in');
+            }, 300);
+          }
+        }, 60);
+      }
+
+      // 非首次加载：跳过打字机，直接显示标题，副标题淡入
+      if (!isFirstLoad) {
+        h1.textContent = fullText;
+        setTimeout(function() {
+          subtitle.classList.add('fade-in');
+        }, 300);
+        return;
+      }
+
+      // 首次加载：等开机动画完成
+      var bootTimer = setTimeout(startTypewriter, 4500);
+      window.addEventListener('boot-complete', function() {
+        clearTimeout(bootTimer);
+        startTypewriter();
+      });
+    })();
+  </script>
 
   <!-- 开关控制 -->
   <script>
