@@ -630,9 +630,8 @@
         }, 300);
       });
 
-      // ===== Phase 1: 终端代码瀑布 =====
-      // 前几条卡顿 → 后面飞流直下，几秒内铺满全屏
-      var _cascadeLines = [
+      // ===== Phase 1: 终端代码瀑布（顺序打出） =====
+      var _bootLines = [
         '> SYS_INIT: LOADING CYBERFRAME v3.1.4...............',
         '> SYS_INIT: MOUNTING SECURE CHANNEL.................',
         '> SYS_INIT: INITIALIZING HARDWARE ABSTRACTION.......',
@@ -654,48 +653,58 @@
         '> SYS_INIT: FINALIZING............................ OK',
       ];
       var _lineEls = [];
-      var _completedLines = 0;
+      var _lineIdx = 0, _charPos = 0;
       var _cascadeTimer = null;
 
       // 清空 terminal 并动态创建行元素
       terminal.innerHTML = '';
-      _cascadeLines.forEach(function() {
+      _bootLines.forEach(function() {
         var el = document.createElement('div');
         terminal.appendChild(el);
         _lineEls.push(el);
       });
 
-      // 为每行启动打字（瀑布式错开启动）
-      _cascadeLines.forEach(function(text, idx) {
-        var startDelay = idx * 45;        // 每行错开 45ms
-        var baseSpeed = idx < 2 ? 60 :     // 前2行: 卡顿
-                       idx < 4 ? 25 :      // 3-4行: 过渡
-                       7;                  // 其余: 飞流
+      // 逐行打字
+      function typeNextLine() {
+        if (_skipped) return;
+        if (_lineIdx >= _bootLines.length) {
+          showContinuePrompt();
+          return;
+        }
+        var text = _bootLines[_lineIdx];
+        var el = _lineEls[_lineIdx];
+        var baseSpeed = _lineIdx < 2 ? 60 :     // 前2行: 卡顿
+                       _lineIdx < 4 ? 25 :      // 3-4行: 过渡
+                       8;                       // 其余: 飞流
 
-        setTimeout(function() {
-          var pos = 0;
-          var el = _lineEls[idx];
-          function tick() {
-            if (_skipped) return;
-            el.textContent += text[pos];
-            pos++;
-            if (pos >= text.length) {
-              _completedLines++;
-              if (_completedLines >= _cascadeLines.length) {
-                showContinuePrompt();
-              }
-              return;
-            }
-            var delay = baseSpeed;
-            // 前2行卡顿效果：随机变慢
-            if (idx < 2 && Math.random() < 0.13) {
-              delay = 180 + Math.random() * 250;
-            }
-            _cascadeTimer = setTimeout(tick, delay);
+        _charPos = 0;
+        function tick() {
+          if (_skipped) return;
+          el.textContent += text[_charPos];
+          _charPos++;
+          if (_charPos >= text.length) {
+            _lineIdx++;
+            // 每完成一行自动滚动到底部
+            terminal.scrollTop = terminal.scrollHeight;
+            // 行间间隔：前几行稍长，后面几乎不停
+            var gap = _lineIdx < 2 ? 200 : _lineIdx < 5 ? 80 : 10;
+            _cascadeTimer = setTimeout(typeNextLine, gap);
+            return;
           }
-          tick();
-        }, startDelay);
-      });
+          // 打字时自动保持在可视区域
+          if (terminal.scrollTop > terminal.scrollHeight - terminal.clientHeight - 60) {
+            terminal.scrollTop = terminal.scrollHeight;
+          }
+          var delay = baseSpeed;
+          // 前2行卡顿：随机变慢
+          if (_lineIdx < 2 && Math.random() < 0.13) {
+            delay = 180 + Math.random() * 250;
+          }
+          _cascadeTimer = setTimeout(tick, delay);
+        }
+        tick();
+      }
+      typeNextLine();
 
       // 代码跑完后显示点击继续
       function showContinuePrompt() {
