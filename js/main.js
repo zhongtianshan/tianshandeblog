@@ -819,9 +819,7 @@ document.addEventListener('keydown', function(e) {
     'font-family:"Minecraft",monospace;font-size:1.6em;' +
     'letter-spacing:2px;' +
     'color:#00ff41;text-shadow:0 0 10px rgba(0,255,65,0.8),0 0 30px rgba(0,255,65,0.3);' +
-    'pointer-events:none;opacity:0;' +
-    'transition:opacity 0.3s ease,transform 0.15s ease;' +
-    'transform:scale(1);';
+    'pointer-events:none;opacity:0;';
   document.body.appendChild(_comboEl);
 
   function showCombo() {
@@ -830,22 +828,29 @@ document.addEventListener('keydown', function(e) {
     var r = ring.getBoundingClientRect();
     _comboEl.textContent = 'x' + _combo;
     _comboEl.style.left = (r.left + r.width / 2) + 'px';
-    _comboEl.style.top = (r.top - 50) + 'px';
-    _comboEl.style.transform = 'scale(1.4)';
-    _comboEl.style.opacity = '1';
-    void _comboEl.offsetWidth;
-    _comboEl.style.transform = 'scale(1)';
+    _comboEl.style.top = (r.top - 58) + 'px';
     // 颜色随连击变化：绿 → 青 → 紫 → 金
     if (_combo >= 20)      _comboEl.style.color = '#ffd700';
     else if (_combo >= 10) _comboEl.style.color = '#ff00ff';
     else if (_combo >= 5)  _comboEl.style.color = '#00f0ff';
     else                   _comboEl.style.color = '#00ff41';
 
+    // 弹跳弹出动画
+    _comboEl.animate([
+      { transform: 'translateY(12px) scale(0.4)', opacity: '0' },
+      { transform: 'translateY(-4px) scale(1.2)', opacity: '1' },
+      { transform: 'translateY(2px) scale(0.95)',  opacity: '1' },
+      { transform: 'translateY(0) scale(1)',       opacity: '1' }
+    ], { duration: 380, easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' });
+
     // 清除旧定时器
     if (_comboTimer) clearTimeout(_comboTimer);
     // 1.2s 无点击则渐隐并重置
     _comboTimer = setTimeout(function() {
-      _comboEl.style.opacity = '0';
+      _comboEl.animate([
+        { opacity: '1', transform: 'scale(1)' },
+        { opacity: '0', transform: 'scale(0.6)' }
+      ], { duration: 250, easing: 'ease-in' });
       _combo = 0;
     }, 1200);
   }
