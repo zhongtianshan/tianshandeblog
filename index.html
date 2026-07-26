@@ -653,19 +653,30 @@
       }
       typeNext();
 
-      // ===== Web Audio 崩坏音效（iOS 兼容：首次交互时才创建 AudioContext） =====
+      // ===== Web Audio 崩坏音效 =====
       var _glitchCtx = null;
       var _glitchQueue = [];
 
-      // 首次交互时创建 AudioContext + 刷队列
+      // 立即创建 AudioContext（可能被 suspend，但后续可 resume）
+      try { _glitchCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
+
+      // 状态变化时自动刷队列（比如 resume 成功后）
+      if (_glitchCtx) {
+        _glitchCtx.onstatechange = function() {
+          if (_glitchCtx.state === 'running' && _glitchQueue.length) {
+            var q = _glitchQueue.slice();
+            _glitchQueue = [];
+            q.forEach(function(play) { try { play(); } catch(e) {} });
+            _glitchCtx.onstatechange = null;
+          }
+        };
+      }
+
+      // 首次交互时强制解锁 + 刷队列
       function _unlockGlitch() {
         document.removeEventListener('click', _unlockGlitch);
         document.removeEventListener('touchstart', _unlockGlitch);
         document.removeEventListener('keydown', _unlockGlitch);
-        // 在用户手势中创建（iOS Safari 硬性要求）
-        if (!_glitchCtx) {
-          try { _glitchCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
-        }
         if (_glitchCtx && _glitchCtx.state === 'suspended') {
           _glitchCtx.resume().catch(function(){});
         }
@@ -680,58 +691,61 @@
 
       function playGlitch(duration, intensity) {
         try {
-          // 还没 AudioContext → 存队列等首次交互
-          if (!_glitchCtx || _glitchCtx.state !== 'running') {
-            // 先把音源数据构好（避免闭包引用问题）
-            var _bufSize = Math.floor(44100 * duration);
-            var _raw = new Float32Array(_bufSize);
-            for (var i = 0; i < _bufSize; i++) _raw[i] = (Math.random() * 2 - 1) * intensity;
-            var _freq = 1800 + Math.random() * 1500;
-            _glitchQueue.push(function() {
-              try {
-                if (!_glitchCtx) return;
-                var buf = _glitchCtx.createBuffer(1, _bufSize, _glitchCtx.sampleRate || 44100);
-                buf.getChannelData(0).set(_raw);
-                var noise = _glitchCtx.createBufferSource();
-                noise.buffer = buf;
-                var filter = _glitchCtx.createBiquadFilter();
-                filter.type = 'bandpass';
-                filter.frequency.value = _freq;
-                filter.Q.value = 3;
-                var gain = _glitchCtx.createGain();
-                var t = _glitchCtx.currentTime;
-                gain.gain.setValueAtTime(0.25, t);
-                gain.gain.exponentialRampToValueAtTime(0.001, t + duration);
-                noise.connect(filter);
-                filter.connect(gain);
-                gain.connect(_glitchCtx.destination);
-                noise.start(t);
-                noise.stop(t + duration);
-              } catch(e) {}
-            });
+          // 尝试唤醒（某些浏览器允许非手势 resume）
+          if (_glitchCtx && _glitchCtx.state === 'suspended') {
+            _glitchCtx.resume().catch(function(){});
+          }
+          // AudioContext 已 running → 直接播
+          if (_glitchCtx && _glitchCtx.state === 'running') {
+            var bufSize = Math.floor((_glitchCtx.sampleRate || 44100) * duration);
+            var buf = _glitchCtx.createBuffer(1, bufSize, _glitchCtx.sampleRate || 44100);
+            var data = buf.getChannelData(0);
+            for (var i = 0; i < bufSize; i++) data[i] = (Math.random() * 2 - 1) * intensity;
+            var noise = _glitchCtx.createBufferSource();
+            noise.buffer = buf;
+            var filter = _glitchCtx.createBiquadFilter();
+            filter.type = 'bandpass';
+            filter.frequency.value = 1800 + Math.random() * 1500;
+            filter.Q.value = 3;
+            var gain = _glitchCtx.createGain();
+            var t = _glitchCtx.currentTime;
+            gain.gain.setValueAtTime(0.25, t);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + duration);
+            noise.connect(filter);
+            filter.connect(gain);
+            gain.connect(_glitchCtx.destination);
+            noise.start(t);
+            noise.stop(t + duration);
             return;
           }
 
-          // AudioContext 已 running → 直接播
-          var bufSize = Math.floor((_glitchCtx.sampleRate || 44100) * duration);
-          var buf = _glitchCtx.createBuffer(1, bufSize, _glitchCtx.sampleRate || 44100);
-          var data = buf.getChannelData(0);
-          for (var i = 0; i < bufSize; i++) data[i] = (Math.random() * 2 - 1) * intensity;
-          var noise = _glitchCtx.createBufferSource();
-          noise.buffer = buf;
-          var filter = _glitchCtx.createBiquadFilter();
-          filter.type = 'bandpass';
-          filter.frequency.value = 1800 + Math.random() * 1500;
-          filter.Q.value = 3;
-          var gain = _glitchCtx.createGain();
-          var t = _glitchCtx.currentTime;
-          gain.gain.setValueAtTime(0.25, t);
-          gain.gain.exponentialRampToValueAtTime(0.001, t + duration);
-          noise.connect(filter);
-          filter.connect(gain);
-          gain.connect(_glitchCtx.destination);
-          noise.start(t);
-          noise.stop(t + duration);
+          // 还没 running → 存队列等首次交互解锁
+          var _bufSize = Math.floor(44100 * duration);
+          var _raw = new Float32Array(_bufSize);
+          for (var i = 0; i < _bufSize; i++) _raw[i] = (Math.random() * 2 - 1) * intensity;
+          var _freq = 1800 + Math.random() * 1500;
+          _glitchQueue.push(function() {
+            try {
+              if (!_glitchCtx) return;
+              var buf = _glitchCtx.createBuffer(1, _bufSize, _glitchCtx.sampleRate || 44100);
+              buf.getChannelData(0).set(_raw);
+              var noise = _glitchCtx.createBufferSource();
+              noise.buffer = buf;
+              var filter = _glitchCtx.createBiquadFilter();
+              filter.type = 'bandpass';
+              filter.frequency.value = _freq;
+              filter.Q.value = 3;
+              var gain = _glitchCtx.createGain();
+              var t = _glitchCtx.currentTime;
+              gain.gain.setValueAtTime(0.25, t);
+              gain.gain.exponentialRampToValueAtTime(0.001, t + duration);
+              noise.connect(filter);
+              filter.connect(gain);
+              gain.connect(_glitchCtx.destination);
+              noise.start(t);
+              noise.stop(t + duration);
+            } catch(e) {}
+          });
         } catch(e) {}
       }
 
