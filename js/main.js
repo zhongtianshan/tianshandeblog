@@ -809,6 +809,47 @@ document.addEventListener('keydown', function(e) {
   var _pianoIdx = 0;
   var _pianoCtx = null;
 
+  // 连击提示
+  var _combo = 0;
+  var _comboTimer = null;
+  var _comboEl = document.createElement('div');
+  _comboEl.className = 'combo-indicator';
+  _comboEl.style.cssText =
+    'position:fixed;z-index:9999;' +
+    'font-family:"Minecraft",monospace;font-size:1.6em;' +
+    'letter-spacing:2px;' +
+    'color:#00ff41;text-shadow:0 0 10px rgba(0,255,65,0.8),0 0 30px rgba(0,255,65,0.3);' +
+    'pointer-events:none;opacity:0;' +
+    'transition:opacity 0.3s ease,transform 0.15s ease;' +
+    'transform:scale(1);';
+  document.body.appendChild(_comboEl);
+
+  function showCombo() {
+    _combo++;
+    // 在 logo 附近定位
+    var r = ring.getBoundingClientRect();
+    _comboEl.textContent = 'x' + _combo;
+    _comboEl.style.left = (r.left + r.width / 2) + 'px';
+    _comboEl.style.top = (r.top - 50) + 'px';
+    _comboEl.style.transform = 'scale(1.4)';
+    _comboEl.style.opacity = '1';
+    void _comboEl.offsetWidth;
+    _comboEl.style.transform = 'scale(1)';
+    // 颜色随连击变化：绿 → 青 → 紫 → 金
+    if (_combo >= 20)      _comboEl.style.color = '#ffd700';
+    else if (_combo >= 10) _comboEl.style.color = '#ff00ff';
+    else if (_combo >= 5)  _comboEl.style.color = '#00f0ff';
+    else                   _comboEl.style.color = '#00ff41';
+
+    // 清除旧定时器
+    if (_comboTimer) clearTimeout(_comboTimer);
+    // 1.2s 无点击则渐隐并重置
+    _comboTimer = setTimeout(function() {
+      _comboEl.style.opacity = '0';
+      _combo = 0;
+    }, 1200);
+  }
+
   function playPianoNote(freq) {
     try {
       if (!_pianoCtx) _pianoCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -874,6 +915,9 @@ document.addEventListener('keydown', function(e) {
         var gap = now - lastTap;
         lastTap = now;
 
+        // 间隔超过 0.6s 连击重置
+        if (gap >= 600) _combo = 0;
+
         var vib = 12;
         if (gap < 120) {
           vib = Math.min(130, Math.round(80 * (120 - gap) / 120 + 50));
@@ -887,6 +931,9 @@ document.addEventListener('keydown', function(e) {
         // 钢琴音阶：Do→Re→Mi→...→Do→循环
         playPianoNote(_pianoNotes[_pianoIdx]);
         _pianoIdx = (_pianoIdx + 1) % _pianoNotes.length;
+
+        // 连击提示
+        showCombo();
 
         ring.classList.remove('tapped');
         void ring.offsetWidth;
