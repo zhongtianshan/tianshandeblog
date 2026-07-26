@@ -833,6 +833,7 @@ document.addEventListener('keydown', function(e) {
     _comboEl.textContent = 'x' + _combo;
     _comboEl.style.left = logoCenterX + 'px';
     _comboEl.style.top = finalY + 'px';
+    _comboEl.style.opacity = '1'; // 确保每次都可见
     // 颜色随连击变化：绿 → 青 → 紫 → 金
     if (_combo >= 20)      _comboEl.style.color = '#ffd700';
     else if (_combo >= 10) _comboEl.style.color = '#ff00ff';
@@ -863,6 +864,7 @@ document.addEventListener('keydown', function(e) {
         { opacity: '1', transform: 'scale(1)' },
         { opacity: '0', transform: 'scale(0.6)' }
       ], { duration: 250, easing: 'ease-in' });
+      _comboEl.style.opacity = '0';
       _combo = 0;
     }, 1200);
   }
