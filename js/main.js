@@ -834,11 +834,12 @@ document.addEventListener('keydown', function(e) {
     _comboEl.style.left = logoCenterX + 'px';
     _comboEl.style.top = finalY + 'px';
     _comboEl.style.opacity = '1'; // 确保每次都可见
-    // 颜色随连击变化：绿 → 青 → 紫 → 金
-    if (_combo >= 20)      _comboEl.style.color = '#ffd700';
-    else if (_combo >= 10) _comboEl.style.color = '#ff00ff';
-    else if (_combo >= 5)  _comboEl.style.color = '#00f0ff';
-    else                   _comboEl.style.color = '#00ff41';
+    // 颜色随连击递增渐变：每次转 14°（绿→青→蓝→紫→红→橙→黄→循环）
+    var hue = (_combo * 14 + 100) % 360;
+    _comboEl.style.color = 'hsl(' + hue + ', 100%, 55%)';
+    _comboEl.style.textShadow =
+      '0 0 8px hsla(' + hue + ', 100%, 55%, 0.8),' +
+      '0 0 25px hsla(' + hue + ', 100%, 55%, 0.3)';
 
     if (_combo === 1) {
       // 第一次弹出：从 LOGO 中心弹射出来
