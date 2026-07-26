@@ -795,7 +795,7 @@ document.addEventListener('keydown', function(e) {
   });
 })();
 
-// ===== Logo 彩蛋：点击连击 + 长按缩放手感 =====
+// ===== Logo 彩蛋：点击连击 + 长按缩放手感 + 钢琴音阶 =====
 (function() {
   var ring = document.querySelector('.logo-ring');
   if (!ring) return;
@@ -803,6 +803,36 @@ document.addEventListener('keydown', function(e) {
   var longTimer = null;
   var holding = false;
   var vibeTimer = null;
+
+  // 钢琴八度：Do Re Mi Fa So La Ti Do
+  var _pianoNotes = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25];
+  var _pianoIdx = 0;
+  var _pianoCtx = null;
+
+  function playPianoNote(freq) {
+    try {
+      if (!_pianoCtx) _pianoCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (_pianoCtx.state === 'suspended') _pianoCtx.resume();
+      var now = _pianoCtx.currentTime;
+
+      // 三层谐波叠加模拟钢琴音色
+      [1, 2, 3].forEach(function(h, i) {
+        var osc = _pianoCtx.createOscillator();
+        osc.type = i === 0 ? 'triangle' : 'sine';
+        osc.frequency.value = freq * h;
+        var gain = _pianoCtx.createGain();
+        var vol = i === 0 ? 0.25 : (i === 1 ? 0.08 : 0.03);
+        // 快速起 + 指数衰减
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(vol, now + 0.006);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+        osc.connect(gain);
+        gain.connect(_pianoCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.8);
+      });
+    } catch(e) {}
+  }
 
   function startVibe() {
     if (!navigator.vibrate || vibeTimer) return;
@@ -853,6 +883,10 @@ document.addEventListener('keydown', function(e) {
           vib = 18;
         }
         if (navigator.vibrate) navigator.vibrate(vib);
+
+        // 钢琴音阶：Do→Re→Mi→...→Do→循环
+        playPianoNote(_pianoNotes[_pianoIdx]);
+        _pianoIdx = (_pianoIdx + 1) % _pianoNotes.length;
 
         ring.classList.remove('tapped');
         void ring.offsetWidth;
