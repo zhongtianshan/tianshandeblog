@@ -1430,9 +1430,8 @@ body {
 /* 终端文字 */
 #boot-terminal {
   position: absolute;
-  top: 35%;
-  left: 50%;
-  transform: translateX(-50%);
+  top: 60px;
+  left: 30px;
   font-family: "Minecraft", monospace;
   font-size: 0.85em;
   color: var(--green, #00ff41);
@@ -1671,7 +1670,8 @@ header .subtitle.fade-in {
   #boot-terminal {
     font-size: 0.7em;
     width: 280px;
-    top: 30%;
+    top: 40px;
+    left: 20px;
   }
   #boot-title {
     font-size: 2.4em;
