@@ -15,6 +15,7 @@
   <!-- 开机动画遮罩 -->
   <div id="boot-overlay">
     <div id="boot-terminal"></div>
+    <div id="boot-prompt"></div>
     <div id="boot-title" data-text="中天山">中天山</div>
     <div id="boot-skip">SKIP</div>
     <div id="boot-scanline"></div>
@@ -823,35 +824,23 @@
       // 代码跑完后显示点击继续
       function showContinuePrompt() {
         if (_skipped) return;
-        // 在末尾追加一行 "> 点击任意继续"
-        var promptEl = document.createElement('div');
-        promptEl.id = 'boot-continue';
-        terminal.appendChild(promptEl);
+        var promptEl = document.getElementById('boot-prompt');
+        if (!promptEl) return;
+        promptEl.style.display = 'block';
         var text = '> 点击任意继续';
         var i = 0;
         var iv = setInterval(function() {
-          if (_skipped) { clearInterval(iv); return; }
+          if (_skipped) { clearInterval(iv); promptEl.textContent = ''; return; }
           promptEl.textContent += text[i];
           i++;
-          if (i >= text.length) {
-            clearInterval(iv);
-            // 打字完成后确保可见
-            terminal.scrollTop = terminal.scrollHeight;
-          }
+          if (i >= text.length) clearInterval(iv);
         }, 25);
-        // 立即滚一次
-        terminal.scrollTop = terminal.scrollHeight;
-        // 再延迟滚一次（确保 DOM 渲染完毕）
-        setTimeout(function() {
-          terminal.scrollTop = terminal.scrollHeight;
-        }, 100);
         // 一次点击 → 解锁音频 + 进入崩坏
         overlay.addEventListener('click', function _cont() {
           if (_skipped) return;
           overlay.removeEventListener('click', _cont);
           clearInterval(iv);
           promptEl.textContent = text;
-          terminal.scrollTop = terminal.scrollHeight;
           _unlockGlitch();
           revealTitle();
         });

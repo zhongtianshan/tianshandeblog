@@ -1444,8 +1444,20 @@ body {
   white-space: nowrap;
 }
 
-/* SKIP 按钮 */
-/* SKIP 按钮 */
+/* 底部固定提示（永远可见，不随 terminal 滚动） */
+#boot-prompt {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: "Minecraft", monospace;
+  font-size: 0.85em;
+  color: var(--green, #00ff41);
+  text-shadow: 0 0 10px rgba(0,255,65,0.5);
+  display: none;
+  white-space: nowrap;
+  letter-spacing: 2px;
+}
 #boot-skip {
   position: absolute;
   top: 20px;
@@ -1700,6 +1712,10 @@ header .subtitle.fade-in {
     font-size: 2.4em;
     letter-spacing: 4px;
     top: 44%;
+  }
+  #boot-prompt {
+    font-size: 0.7em;
+    bottom: 20px;
   }
   #boot-skip {
     top: 12px;
