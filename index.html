@@ -20,6 +20,7 @@
       <div id="boot-line3"></div>
     </div>
     <div id="boot-title" data-text="中天山">中天山</div>
+    <div id="boot-skip">SKIP</div>
     <div id="boot-audio-hint">> <span class="cursor-blink">_</span></div>
     <div id="boot-scanline"></div>
   </div>
@@ -612,14 +613,16 @@
       var line3 = document.getElementById('boot-line3');
       var titleEl = document.getElementById('boot-title');
 
-      // 点击遮罩跳过开机动画
+      // 点击遮罩只解锁音频，不跳过
       var _skipped = false;
       var _phaseTimer = null;
-      overlay.addEventListener('click', function() {
+
+      // 右上角 SKIP 按钮
+      document.getElementById('boot-skip').addEventListener('click', function(e) {
+        e.stopPropagation();
         if (_skipped) return;
         _skipped = true;
         if (_phaseTimer) clearTimeout(_phaseTimer);
-        // 快速淡出 300ms 后移除
         overlay.classList.add('fade-out');
         setTimeout(function() {
           removeOverlay();

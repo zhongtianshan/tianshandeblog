@@ -1464,6 +1464,29 @@ body {
   animation: twBlink 0.6s step-end infinite;
 }
 
+/* SKIP 按钮 */
+#boot-skip {
+  position: absolute;
+  top: 20px;
+  right: 25px;
+  font-family: "Minecraft", monospace;
+  font-size: 0.7em;
+  color: rgba(0, 240, 255, 0.4);
+  cursor: pointer;
+  letter-spacing: 2px;
+  padding: 6px 12px;
+  border: 1px solid rgba(0, 240, 255, 0.2);
+  background: rgba(0, 240, 255, 0.05);
+  transition: all 0.3s;
+  z-index: 10;
+}
+#boot-skip:hover {
+  color: rgba(0, 240, 255, 0.9);
+  border-color: rgba(0, 240, 255, 0.6);
+  background: rgba(0, 240, 255, 0.1);
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.2);
+}
+
 /* Glitch 标题 */
 #boot-title {
   font-family: "Minecraft", monospace;
@@ -1699,6 +1722,12 @@ header .subtitle.fade-in {
     bottom: 30px;
     right: 20px;
     font-size: 0.65em;
+  }
+  #boot-skip {
+    top: 12px;
+    right: 14px;
+    font-size: 0.6em;
+    padding: 4px 8px;
   }
 }
 
