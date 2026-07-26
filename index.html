@@ -635,40 +635,131 @@
         '> [LINUX] Linux version 6.1.42-arch1-1 (linux@archlinux)',
         '> [LINUX] x86_64 CPU @ 2.50GHz, family 6 model 42',
         '> [LINUX] CPU features: SSE4.1 SSE4.2 AVX2 AES-NI RDRAND',
+        '> [LINUX] CPU features: SMEP SMAP PTI IBRS IBPB',
         '> [LINUX] SMP: 4 cores / 8 threads activated',
-        '> [ACPI]   RSDP 0x0000000096419f82',
+        '> [LINUX] Command line: root=/dev/sda2 quiet splash',
+        '> [LINUX] Kernel image: 0x1000000 - 0x12fffff',
+        '> [ACPI]   RSDP 0x00000000ec031199',
+        '> [ACPI]   RSDT 0x97fc695a',
+        '> [ACPI]   XSDT 0x0000000086cb0fb3',
         '> [ACPI]   DSDT loaded: 142 tables',
-        '> [MEM]   e820: 4096MB available (3673MB free)',
+        '> [ACPI]   FADT: rev 6, 0xeb65a6a4',
+        '> [ACPI]   SSDT: CPU-PM loaded',
+        '> [ACPI]   SSDT: GPU-PM loaded',
+        '> [ACPI]   SSDT: TBT loaded',
+        '> [ACPI]   PM timer: 3.579MHz, IRQ 9',
+        '> [ACPI]   Enabled 2 GPEs',
+        '> [MEM]   e820: 32768MB available (31936MB free)',
+        '> [MEM]   DMA zone: 4096 pages (4KB)',
+        '> [MEM]   DMA32 zone: 1048576 pages (4KB)',
+        '> [MEM]   Normal zone: 4194304 pages (4KB)',
+        '> [MEM]   HighMem zone: 0 pages',
         '> [MEM]   Initializing page tables... OK',
+        '> [MEM]   Detected memory: 32768MB',
+        '> [MEM]   NX: Execute Disable enabled',
+        '> [MEM]   SMBIOS: v3.4 present',
+        '> [MEM]   DMA pool: 8192 KiB reserved',
+        '> [PCI]   PCI BIOS revision 3.00',
         '> [PCI]   Probing PCI hardware (00:00.0 - 00:1F.7)',
-        '> [PCI]   00:1d.0 vendor=1022 device=df36',
-        '> [PCI]   01:00.0 vendor=1022 device=2a2a',
+        '> [PCI]   00:00.0 vendor=1002 device=242c rev=02',
+        '> [PCI]   00:01.0 vendor=1b21 device=f2ac rev=02',
+        '> [PCI]   00:02.0 vendor=8086 device=1bbb rev=01',
+        '> [PCI]   00:14.0 vendor=8086 device=eaf6 rev=01',
+        '> [PCI]   00:14.2 vendor=1002 device=5729 rev=03',
+        '> [PCI]   00:16.0 vendor=1022 device=39a3 rev=02',
+        '> [PCI]   00:17.0 vendor=1022 device=c3aa rev=00',
+        '> [PCI]   00:1b.0 vendor=10ec device=98bd rev=01',
+        '> [PCI]   00:1c.0 vendor=1002 device=551b rev=01',
+        '> [PCI]   00:1d.0 vendor=8086 device=4aa2 rev=00',
+        '> [PCI]   00:1f.2 vendor=1002 device=548a rev=00',
+        '> [PCI]   00:1f.3 vendor=1b21 device=f059 rev=02',
+        '> [PCI]   01:00.0 vendor=1002 device=7548 rev=03',
+        '> [PCI]   02:00.0 vendor=10ec device=4f22 rev=02',
+        '> [PCI]   03:00.0 vendor=1002 device=f5d7 rev=03',
         '> [ATA]   ata1: SATA link up (6.0 Gbps)',
+        '> [ATA]   ata2: SATA link up (6.0 Gbps)',
+        '> [ATA]   ata3: SATA link up (6.0 Gbps)',
+        '> [ATA]   ata4: SATA link up (6.0 Gbps)',
         '> [ATA]   ata1.00: SAMSUNG SSD 870 EVO 500GB',
-        '> [ATA]   ata2: SATA link up (3.0 Gbps)',
+        '> [ATA]   ata1.00: 976773168 sectors',
+        '> [ATA]   ata2.00: WDC WD40EZRZ 4TB',
+        '> [ATA]   ata2.00: 7814037168 sectors',
+        '> [ATA]   ata3.00: KINGSTON A400 240GB',
+        '> [ATA]   ata3.00: 468862128 sectors',
+        '> [ATA]   SATA controller: AHCI v1.31',
+        '> [EXT4]  sda1: mounted /boot (ext4, ro)',
         '> [EXT4]  sda2: mounted / (ext4, rw)',
         '> [EXT4]  sda3: mounted /home (ext4, rw)',
+        '> [EXT4]  sdb1: mounted /mnt/data (ext4, rw)',
+        '> [EXT4]  Journal inode found at 0xb416',
+        '> [EXT4]  Journal inode found at 0x5b22',
         '> [EXT4]  Recovery complete (0 transactions)',
-        '> [NET]   eth0: Realtek RTL8169 at 0xa28da7e6',
+        '> [EXT4]  119045 inodes, 724902 blocks',
+        '> [XFS]   sdb1: mounted, logdev internal',
+        '> [FS]   VFS: Mounted root (ext4 filesystem)',
+        '> [NET]   IPv6: enabled, privacy extensions',
+        '> [NET]   IPv4: packet forwarding disabled',
+        '> [NET]   eth0: Realtek RTL8169 at 0xa65d7ad1',
+        '> [NET]   eth0: MAC 52:00:A5:FA:09:39',
         '> [NET]   eth0: link UP (1000Mbps/Full)',
-        '> [NET]   IPv4: DHCP lease 192.168.1.99 received',
+        '> [NET]   IPv4: DHCP lease 192.168.1.214 received',
+        '> [NET]   IPv4: gateway 192.168.1.1 reachable',
         '> [NET]   DNS: 8.8.8.8, 8.8.4.4',
+        '> [NET]   wlan0: Intel Wireless-AC 9260',
+        '> [NET]   wlan0: scan completed (6 APs)',
         '> [USB]   usb1: xHCI host controller (x86_64)',
+        '> [USB]   usb1: 6 ports detected',
+        '> [USB]   usb2: xHCI host controller (x86_64)',
+        '> [USB]   usb2: 6 ports detected',
         '> [USB]   usb 1-2: HID keyboard (Logitech)',
         '> [USB]   usb 1-3: HID mouse (Logitech)',
-        '> [ALSA]  hdaudio: HDA Intel PCH at 0xa579f7c0',
+        '> [USB]   usb 1-6: USB 3.0 hub',
+        '> [USB]   usb 2-1: USB flash drive (SanDisk)',
+        '> [USB]   usb-storage: devices scanned',
+        '> [INPUT] mousedev: PS/2 mouse device common',
+        '> [ALSA]  hdaudio: HDA Intel PCH at 0xa6c70d04',
+        '> [ALSA]  hdaudio: codec #0: Realtek ALC1220',
+        '> [ALSA]  hdaudio: codec #1: NVIDIA HDMI/DP',
         '> [ALSA]  Audio device initialized',
+        '> [ALSA]  hdmi: HDMI/DP PCM supported',
+        '> [ALSA]  hdmi: max channels: 8',
+        '> [ALSA]  Control device: hw:CARD=PCH',
         '> [DRM]   i915: Intel HD Graphics 630',
+        '> [DRM]   i915: 4096MB VRAM, 256MB stolen',
         '> [DRM]   i915: resolution 1920x1080 @ 60Hz',
+        '> [DRM]   fb0: switching to inteldrmfb',
+        '> [DRM]   Initialized i915 1.6.0',
+        '> [FB]    Console: switching to color frame buffer',
+        '> [FB]    1920x1080, 32bpp',
         '> [RNG]   random: crng init done',
         '> [TPM]   TPM 2.0 device detected',
+        '> [TPM]   measured boot: PCR 0-7 ok',
+        '> [TPM]   TPM cmd: startup clear',
+        '> [SEC]   Lockdown: integrity enabled',
+        '> [SEC]   Loaded 3 keyring keys',
+        '> [BT]    Bluetooth: HCI v5.1',
+        '> [BT]    Bluetooth: firmware loaded',
+        '> [EDAC]  MC0: corrected errors: 0',
+        '> [WDT]   watchdog: pretimeout enabled',
         '> [SYS]   Kernel boot completed. PID 1: init',
+        '> [SYS]   freeing unused kernel memory: 2048K',
+        '> [SYS]   rodata_test: all tests passed',
         '> [SYS]   Service: networking.service............ OK',
-        '> [SYS]   Service: systemd-logind.service....... OK',
-        '> [SYS]   Service: sshd.service................. OK',
-        '> [SYS]   Service: cronie.service............... OK',
+        '> [SYS]   Service: systemd-logind.service............ OK',
+        '> [SYS]   Service: sshd.service............ OK',
+        '> [SYS]   Service: cronie.service............ OK',
         '> [SYS]   Service: bluetooth.service............ OK',
-        '> [SYS]   Startup complete in 2.36s',
+        '> [SYS]   Service: NetworkManager.service............ OK',
+        '> [SYS]   Service: ufw.service............ OK',
+        '> [SYS]   Service: docker.service............ OK',
+        '> [SYS]   Service: mysql.service............ OK',
+        '> [SYS]   Service: nginx.service............ OK',
+        '> [SYS]   Service: redis.service............ OK',
+        '> [SYS]   Service: postfix.service............ OK',
+        '> [SYS]   Service: dbus.service............ OK',
+        '> [SYS]   Service: polkit.service............ OK',
+        '> [SYS]   Service: getty@tty1.service............ OK',
+        '> [SYS]   Service: syslog-ng.service............ OK',
       ];
       var _lineEls = [];
       var _lineIdx = 0, _charPos = 0;
@@ -691,42 +782,41 @@
         }
         var text = _bootLines[_lineIdx];
         var el = _lineEls[_lineIdx];
-        var baseSpeed = _lineIdx === 0 ? 25 :   // 第1行: 卡顿
-                       _lineIdx === 1 ? 15 :    // 第2行: 稍慢
-                       _lineIdx < 4 ? 8 :       // 3-4行: 过渡
-                       _lineIdx < 8 ? 4 :       // 5-8行: 快速
-                       2;                       // 其余: 飞流
 
-        _charPos = 0;
-        function tick() {
-          if (_skipped) return;
-          el.textContent += text[_charPos];
-          _charPos++;
-          if (_charPos >= text.length) {
-            _lineIdx++;
-            // 每完成一行自动滚动到底部
-            terminal.scrollTop = terminal.scrollHeight;
-            // 行间间隔：前几行稍长，后面几乎不停
-            var gap = _lineIdx < 2 ? 150 : _lineIdx < 4 ? 60 : 8;
-            _cascadeTimer = setTimeout(typeNextLine, gap);
-            return;
+        if (_lineIdx < 5) {
+          // 前5行逐字打出
+          var baseSpeed = _lineIdx === 0 ? 20 :
+                         _lineIdx === 1 ? 12 :
+                         _lineIdx < 4 ? 6 : 3;
+          _charPos = 0;
+          function tick() {
+            if (_skipped) return;
+            el.textContent += text[_charPos];
+            _charPos++;
+            if (_charPos >= text.length) {
+              _lineIdx++;
+              terminal.scrollTop = terminal.scrollHeight;
+              var gap = _lineIdx < 2 ? 180 : _lineIdx < 4 ? 80 : 30;
+              _cascadeTimer = setTimeout(typeNextLine, gap);
+              return;
+            }
+            if (terminal.scrollTop > terminal.scrollHeight - terminal.clientHeight - 60) {
+              terminal.scrollTop = terminal.scrollHeight;
+            }
+            var delay = baseSpeed;
+            if (_lineIdx === 0 && Math.random() < 0.1) delay = 120 + Math.random() * 150;
+            if (_lineIdx === 1 && Math.random() < 0.05) delay = 60 + Math.random() * 100;
+            _cascadeTimer = setTimeout(tick, delay);
           }
-          // 打字时自动保持在可视区域
-          if (terminal.scrollTop > terminal.scrollHeight - terminal.clientHeight - 60) {
-            terminal.scrollTop = terminal.scrollHeight;
-          }
-          var delay = baseSpeed;
-          // 第1行卡顿：随机停顿
-          if (_lineIdx === 0 && Math.random() < 0.1) {
-            delay = 120 + Math.random() * 150;
-          }
-          // 第2行偶尔小卡
-          if (_lineIdx === 1 && Math.random() < 0.05) {
-            delay = 80 + Math.random() * 100;
-          }
-          _cascadeTimer = setTimeout(tick, delay);
+          tick();
+        } else {
+          // 第6行起：整行闪现，行间隔逐渐缩短
+          el.textContent = text;
+          _lineIdx++;
+          terminal.scrollTop = terminal.scrollHeight;
+          var gap = _lineIdx < 20 ? 40 : _lineIdx < 50 ? 20 : 10;
+          _cascadeTimer = setTimeout(typeNextLine, gap);
         }
-        tick();
       }
       typeNextLine();
 
