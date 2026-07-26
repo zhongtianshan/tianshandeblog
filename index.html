@@ -233,6 +233,25 @@
       if (mi[1]) mi[1].classList.add('hm-on');
       if (mi[2]) mi[2].classList.add('hm-on');
     })();
+
+    // 自动启动背景音乐：首次用户交互（点击/触摸/按键）时播放
+    (function() {
+      var _autoStarted = false;
+      function _autoPlay() {
+        if (_autoStarted) return;
+        _autoStarted = true;
+        if (!musicPlaying) {
+          _pauseTime = 0;
+          _playWasm(0);
+        }
+        document.removeEventListener('click', _autoPlay);
+        document.removeEventListener('touchstart', _autoPlay);
+        document.removeEventListener('keydown', _autoPlay);
+      }
+      document.addEventListener('click', _autoPlay);
+      document.addEventListener('touchstart', _autoPlay);
+      document.addEventListener('keydown', _autoPlay);
+    })();
   </script>
 
   <!-- 帧动画背景（延后加载：把带宽优先让给音频） -->
