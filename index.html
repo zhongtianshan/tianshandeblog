@@ -833,16 +833,25 @@
           if (_skipped) { clearInterval(iv); return; }
           promptEl.textContent += text[i];
           i++;
-          if (i >= text.length) clearInterval(iv);
+          if (i >= text.length) {
+            clearInterval(iv);
+            // 打字完成后确保可见
+            terminal.scrollTop = terminal.scrollHeight;
+          }
         }, 25);
-        // 滚动到最底部让新行可见
+        // 立即滚一次
         terminal.scrollTop = terminal.scrollHeight;
+        // 再延迟滚一次（确保 DOM 渲染完毕）
+        setTimeout(function() {
+          terminal.scrollTop = terminal.scrollHeight;
+        }, 100);
         // 一次点击 → 解锁音频 + 进入崩坏
         overlay.addEventListener('click', function _cont() {
           if (_skipped) return;
           overlay.removeEventListener('click', _cont);
           clearInterval(iv);
           promptEl.textContent = text;
+          terminal.scrollTop = terminal.scrollHeight;
           _unlockGlitch();
           revealTitle();
         });
