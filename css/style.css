@@ -1436,7 +1436,7 @@ body {
   font-size: 0.85em;
   color: var(--green, #00ff41);
   text-align: left;
-  width: 320px;
+  width: 440px;
   text-shadow: 0 0 6px rgba(0,255,65,0.6);
   line-height: 1.8;
 }
@@ -1693,7 +1693,7 @@ header .subtitle.fade-in {
 @media (max-width: 600px) {
   #boot-terminal {
     font-size: 0.7em;
-    width: 280px;
+    width: 320px;
     top: 40px;
     left: 20px;
   }

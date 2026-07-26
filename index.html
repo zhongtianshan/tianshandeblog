@@ -19,6 +19,8 @@
       <div id="boot-line2"></div>
       <div id="boot-line3"></div>
       <div id="boot-line4"></div>
+      <div id="boot-line5"></div>
+      <div id="boot-line6"></div>
     </div>
     <div id="boot-title" data-text="中天山">中天山</div>
     <div id="boot-skip">SKIP</div>
@@ -639,11 +641,13 @@
 
       // ===== Phase 1: 终端打字 (0 - 800ms) =====
       var lines = [
-        '> INITIALIZING CYBERSYSTEM...',
-        '> LOADING KERNEL MODULES...',
-        '> SYSTEM READY.'
+        '> SYS_INIT: LOADING CYBERFRAME v3.1.4...',
+        '> SYS_INIT: MOUNTING SECURE CHANNEL............ OK',
+        '> SYS_INIT: DECRYPTING KERNEL MODULES.......... OK',
+        '> SYS_INIT: CHECKING SYSTEM INTEGRITY.......... PASS',
+        '> SYS_INIT: ESTABLISHING LINK.................. '
       ];
-      var lineEls = [line1, line2, line3];
+      var lineEls = [line1, line2, line3, document.getElementById('boot-line4'), document.getElementById('boot-line5'), document.getElementById('boot-line6')];
       var charIdx = 0, lineIdx = 0;
 
       function typeNext() {
@@ -655,7 +659,7 @@
         if (charIdx < lines[lineIdx].length) {
           lineEls[lineIdx].textContent += lines[lineIdx][charIdx];
           charIdx++;
-          setTimeout(typeNext, 25 + Math.random() * 20);
+          setTimeout(typeNext, 10 + Math.random() * 15);
         } else {
           charIdx = 0;
           lineIdx++;
@@ -666,23 +670,23 @@
 
       // 代码跑完后显示点击继续
       function showContinuePrompt() {
-        var line4 = document.getElementById('boot-line4');
-        if (!line4) return;
+        var line6 = document.getElementById('boot-line6');
+        if (!line6) return;
         // 逐字打出 "> 点击任意继续"
         var text = '> 点击任意继续';
         var i = 0;
         var iv = setInterval(function() {
           if (_skipped) { clearInterval(iv); return; }
-          line4.textContent += text[i];
+          line6.textContent += text[i];
           i++;
           if (i >= text.length) clearInterval(iv);
-        }, 40);
+        }, 25);
         // 一次点击 → 解锁音频 + 进入崩坏
         overlay.addEventListener('click', function _cont() {
           if (_skipped) return;
           overlay.removeEventListener('click', _cont);
           clearInterval(iv);
-          line4.textContent = text;
+          line6.textContent = text;
           _unlockGlitch();
           revealTitle();
         });
