@@ -630,27 +630,45 @@
         }, 300);
       });
 
-      // ===== Phase 1: 终端代码瀑布（顺序打出） =====
+      // ===== Phase 1: 终端代码瀑布（真实 Linux 启动日志） =====
       var _bootLines = [
-        '> SYS_INIT: LOADING CYBERFRAME v3.1.4...............',
-        '> SYS_INIT: MOUNTING SECURE CHANNEL.................',
-        '> SYS_INIT: INITIALIZING HARDWARE ABSTRACTION.......',
-        '> SYS_INIT: VERIFYING BOOT SIGNATURE................',
-        '> MODULE: loading netstack.core.................... OK',
-        '> MODULE: loading crypto.engine.................... OK',
-        '> MODULE: loading ui.shell......................... OK',
-        '> MODULE: loading audio.driver..................... OK',
-        '> MODULE: loading input.handler.................... OK',
-        '> MEM:   scanning 0x7C00-0x9FFF................. PASS',
-        '> MEM:   scanning 0xA000-0xBFFF................. PASS',
-        '> MEM:   scanning 0xC000-0xDFFF................. PASS',
-        '> NET:   assigning link-local address......... 10.0.0.4',
-        '> NET:   gateway reachable........................ OK',
-        '> NET:   DNS resolution........................... OK',
-        '> PROC: spawning sysmonitor.................... PID 142',
-        '> PROC: spawning eventbus...................... PID 156',
-        '> PROC: spawning render.shell.................. PID 201',
-        '> SYS_INIT: FINALIZING............................ OK',
+        '> [LINUX] Linux version 6.1.42-arch1-1 (linux@archlinux)',
+        '> [LINUX] x86_64 CPU @ 2.50GHz, family 6 model 42',
+        '> [LINUX] CPU features: SSE4.1 SSE4.2 AVX2 AES-NI RDRAND',
+        '> [LINUX] SMP: 4 cores / 8 threads activated',
+        '> [ACPI]   RSDP 0x0000000096419f82',
+        '> [ACPI]   DSDT loaded: 142 tables',
+        '> [MEM]   e820: 4096MB available (3673MB free)',
+        '> [MEM]   Initializing page tables... OK',
+        '> [PCI]   Probing PCI hardware (00:00.0 - 00:1F.7)',
+        '> [PCI]   00:1d.0 vendor=1022 device=df36',
+        '> [PCI]   01:00.0 vendor=1022 device=2a2a',
+        '> [ATA]   ata1: SATA link up (6.0 Gbps)',
+        '> [ATA]   ata1.00: SAMSUNG SSD 870 EVO 500GB',
+        '> [ATA]   ata2: SATA link up (3.0 Gbps)',
+        '> [EXT4]  sda2: mounted / (ext4, rw)',
+        '> [EXT4]  sda3: mounted /home (ext4, rw)',
+        '> [EXT4]  Recovery complete (0 transactions)',
+        '> [NET]   eth0: Realtek RTL8169 at 0xa28da7e6',
+        '> [NET]   eth0: link UP (1000Mbps/Full)',
+        '> [NET]   IPv4: DHCP lease 192.168.1.99 received',
+        '> [NET]   DNS: 8.8.8.8, 8.8.4.4',
+        '> [USB]   usb1: xHCI host controller (x86_64)',
+        '> [USB]   usb 1-2: HID keyboard (Logitech)',
+        '> [USB]   usb 1-3: HID mouse (Logitech)',
+        '> [ALSA]  hdaudio: HDA Intel PCH at 0xa579f7c0',
+        '> [ALSA]  Audio device initialized',
+        '> [DRM]   i915: Intel HD Graphics 630',
+        '> [DRM]   i915: resolution 1920x1080 @ 60Hz',
+        '> [RNG]   random: crng init done',
+        '> [TPM]   TPM 2.0 device detected',
+        '> [SYS]   Kernel boot completed. PID 1: init',
+        '> [SYS]   Service: networking.service............ OK',
+        '> [SYS]   Service: systemd-logind.service....... OK',
+        '> [SYS]   Service: sshd.service................. OK',
+        '> [SYS]   Service: cronie.service............... OK',
+        '> [SYS]   Service: bluetooth.service............ OK',
+        '> [SYS]   Startup complete in 2.36s',
       ];
       var _lineEls = [];
       var _lineIdx = 0, _charPos = 0;
@@ -673,9 +691,11 @@
         }
         var text = _bootLines[_lineIdx];
         var el = _lineEls[_lineIdx];
-        var baseSpeed = _lineIdx < 2 ? 60 :     // 前2行: 卡顿
-                       _lineIdx < 4 ? 25 :      // 3-4行: 过渡
-                       8;                       // 其余: 飞流
+        var baseSpeed = _lineIdx === 0 ? 25 :   // 第1行: 卡顿
+                       _lineIdx === 1 ? 15 :    // 第2行: 稍慢
+                       _lineIdx < 4 ? 8 :       // 3-4行: 过渡
+                       _lineIdx < 8 ? 4 :       // 5-8行: 快速
+                       2;                       // 其余: 飞流
 
         _charPos = 0;
         function tick() {
@@ -687,7 +707,7 @@
             // 每完成一行自动滚动到底部
             terminal.scrollTop = terminal.scrollHeight;
             // 行间间隔：前几行稍长，后面几乎不停
-            var gap = _lineIdx < 2 ? 200 : _lineIdx < 5 ? 80 : 10;
+            var gap = _lineIdx < 2 ? 150 : _lineIdx < 4 ? 60 : 8;
             _cascadeTimer = setTimeout(typeNextLine, gap);
             return;
           }
@@ -696,9 +716,13 @@
             terminal.scrollTop = terminal.scrollHeight;
           }
           var delay = baseSpeed;
-          // 前2行卡顿：随机变慢
-          if (_lineIdx < 2 && Math.random() < 0.13) {
-            delay = 180 + Math.random() * 250;
+          // 第1行卡顿：随机停顿
+          if (_lineIdx === 0 && Math.random() < 0.1) {
+            delay = 120 + Math.random() * 150;
+          }
+          // 第2行偶尔小卡
+          if (_lineIdx === 1 && Math.random() < 0.05) {
+            delay = 80 + Math.random() * 100;
           }
           _cascadeTimer = setTimeout(tick, delay);
         }
