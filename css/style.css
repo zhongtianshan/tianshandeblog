@@ -1447,35 +1447,7 @@ body {
   animation: twBlink 0.6s step-end infinite;
 }
 
-/* 底部等待输入提示 */
-#boot-audio-hint {
-  position: absolute;
-  bottom: 60px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-family: "Minecraft", monospace;
-  font-size: 1em;
-  color: var(--green, #00ff41);
-  text-shadow: 0 0 12px rgba(0,255,65,0.5), 0 0 30px rgba(0,255,65,0.2);
-  transition: opacity 0.3s;
-  pointer-events: none;
-  text-align: center;
-  animation: hintPulse 2s ease-in-out infinite;
-}
-#boot-audio-hint .hint-line {
-  display: block;
-  letter-spacing: 2px;
-}
-#boot-audio-hint .hint-cursor {
-  display: inline-block;
-  animation: twBlink 0.6s step-end infinite;
-  margin-left: 4px;
-}
-@keyframes hintPulse {
-  0%, 100% { opacity: 0.7; }
-  50% { opacity: 1; }
-}
-
+/* SKIP 按钮 */
 /* SKIP 按钮 */
 #boot-skip {
   position: absolute;
@@ -1729,10 +1701,6 @@ header .subtitle.fade-in {
     font-size: 2.4em;
     letter-spacing: 4px;
     top: 44%;
-  }
-  #boot-audio-hint {
-    bottom: 40px;
-    font-size: 0.8em;
   }
   #boot-skip {
     top: 12px;

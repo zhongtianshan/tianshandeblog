@@ -18,13 +18,10 @@
       <div id="boot-line1"></div>
       <div id="boot-line2"></div>
       <div id="boot-line3"></div>
+      <div id="boot-line4"></div>
     </div>
     <div id="boot-title" data-text="中天山">中天山</div>
     <div id="boot-skip">SKIP</div>
-    <div id="boot-audio-hint">
-      <span class="hint-line">> 等待信号...</span>
-      <span class="hint-cursor">█</span>
-    </div>
     <div id="boot-scanline"></div>
   </div>
 
@@ -644,8 +641,7 @@
       function typeNext() {
         if (_skipped) return;
         if (lineIdx >= lines.length) {
-          // 终端打字完成，短暂停顿后进入 glitch 揭示
-          _phaseTimer = setTimeout(revealTitle, 500);
+          showContinuePrompt();
           return;
         }
         if (charIdx < lines[lineIdx].length) {
@@ -659,6 +655,30 @@
         }
       }
       typeNext();
+
+      // 代码跑完后显示点击继续
+      function showContinuePrompt() {
+        var line4 = document.getElementById('boot-line4');
+        if (!line4) return;
+        // 逐字打出 "> 点击任意继续"
+        var text = '> 点击任意继续';
+        var i = 0;
+        var iv = setInterval(function() {
+          if (_skipped) { clearInterval(iv); return; }
+          line4.textContent += text[i];
+          i++;
+          if (i >= text.length) clearInterval(iv);
+        }, 40);
+        // 一次点击 → 解锁音频 + 进入崩坏
+        overlay.addEventListener('click', function _cont() {
+          if (_skipped) return;
+          overlay.removeEventListener('click', _cont);
+          clearInterval(iv);
+          line4.textContent = text;
+          _unlockGlitch();
+          revealTitle();
+        });
+      }
 
       // ===== Web Audio 崩坏音效 =====
       var _glitchCtx = null;
