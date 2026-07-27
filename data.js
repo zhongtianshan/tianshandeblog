@@ -51,6 +51,16 @@ var blogData = {
       "path": "images/yingxiang/晴天.png"
     }
   ],
+  "audios": [
+    {
+      "name": "rain_song.mp3",
+      "path": "yinpin/rain_song.mp3"
+    },
+    {
+      "name": "sun_song.mp3",
+      "path": "yinpin/sun_song.mp3"
+    }
+  ],
   "tags": [
     "随笔",
     "氛围",
@@ -59,5 +69,5 @@ var blogData = {
     "教程",
     "学习"
   ],
-  "updated": "2026-07-27T11:26:25.094862"
+  "updated": "2026-07-27T11:44:45.395360"
 };
